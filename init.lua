@@ -8,12 +8,12 @@ Website: https://githukjkjb.com/brainfucksec/neovim-lua
 
 -- Import Lua modules
 require('packer_init')
-require('core/cocConfig')
 require('core/options')
--- require('core/autocmds')
-require('core/keymaps')
-require('core/colors')
--- require('core/statusline')
--- require('plugins/indent-blankline')
--- require('plugins/alpha-nvim')
+require('core/lualine')
+--require('core/keymaps')
+require('core/LSPSetting')
+require('core/Telescope')
+require('core/Treesitter')
+require('core/cmp')
+require('core/easyConfigs')
 
