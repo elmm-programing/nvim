@@ -1,5 +1,5 @@
 -------------------------------------------------------------
----- Autocfmmand functions
+---- Autocommand functions
 -------------------------------------------------------------
 
 ---- Define autocommands with Lua APIs
