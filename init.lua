@@ -10,10 +10,11 @@ Website: https://githukjkjb.com/brainfucksec/neovim-lua
 require('packer_init')
 require('core/options')
 require('core/lualine')
---require('core/keymaps')
+require('core/keymaps')
 require('core/LSPSetting')
 require('core/Telescope')
 require('core/Treesitter')
 require('core/cmp')
 require('core/easyConfigs')
+require('core/luasnip')
 

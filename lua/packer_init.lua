@@ -31,6 +31,8 @@ require('packer').startup(function(use)
     requires = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
   }
 
+use {'tzachar/cmp-tabnine', run='./install.sh', requires = 'hrsh7th/nvim-cmp'}
+
   use { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     run = function()
@@ -59,6 +61,18 @@ require('packer').startup(function(use)
 
   -- Fuzzy Finder Algorithm which requires local dependencies to be built. Only load if `make` is available
   use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable 'make' == 1 }
+
+  --old plugins used in coc config
+  use 'scrooloose/nerdtree'
+  use 'ryanoasis/vim-devicons'
+  --use 'liuchengxu/vista.vim'
+  use 'christoomey/vim-tmux-navigator'
+  --use 'rafi/awesome-vim-colorschemes'
+  use 'frazrepo/vim-rainbow'
+  use 'christoomey/vim-system-copy'
+  use 'jiangmiao/auto-pairs'
+  use 'morhetz/gruvbox'
+  use "rafamadriz/friendly-snippets"
 
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')

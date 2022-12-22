@@ -2,6 +2,7 @@
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
 
+
 cmp.setup {
   snippet = {
     expand = function(args)
@@ -35,11 +36,26 @@ cmp.setup {
       end
     end, { 'i', 's' }),
   },
+formatting = {
+  fields = {'menu', 'abbr', 'kind'},
+  format = function(entry, item)
+    local menu_icon = {
+      nvim_lsp = 'λ',
+      luasnip = '⋗',
+      buffer = 'Ω',
+      path = '🖫',
+      cmp_tabnine='🧠',
+    }
+
+    item.menu = menu_icon[entry.source.name]
+    return item
+  end,
+},
   sources = {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
+    { name = 'cmp_tabnine' },
   },
 }
-
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

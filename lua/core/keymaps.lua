@@ -12,6 +12,8 @@ end
 
 -- Change leader to a comma
 vim.g.mapleader = ','
+vim.g.maplocalleader = ','
+
 
 -----------------------------------------------------------
 -- Neovim shortcuts
@@ -19,6 +21,18 @@ vim.g.mapleader = ','
 
 -- Map Esc to kk
 map('i', 'kj', '<Esc>')
+
+-- [[ Basic Keymaps ]]
+-- Set <space> as the leader key
+-- See `:help mapleader`
+--  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
+-- Keymaps for better default experience
+-- See `:help vim.keymap.set()`
+vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+
+-- Remap for dealing with word wrap
+vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
 
 
@@ -33,27 +47,24 @@ map('n', '<C-L>', '<C-W>l')
 
 -- Close all windows and exit from Neovim with <leader> and q
 vim.cmd [[
-
-nmap <leader>w :w<CR>
-nmap <Leader>q :q<CR>
-nmap <Leader>wq :wq<CR>
-nnoremap <S-l> :bnext<CR>
-nnoremap <S-h> :bprevious<CR>
-nmap <Leader>t :Vista coc<CR>
 nnoremap  <silent>   <tab>  :if &modifiable && !&readonly && &modified <CR> :write<CR> :endif<CR>:bnext<CR>
 kj
 nnoremap  <silent> <s-tab>  :if &modifiable && !&readonly && &modified <CR> :write<CR> :endif<CR>:bprevious<CR>
-
-
 ]]
 
 map('n', '<leader>nt', ':NERDTreeFind<CR>')
+map('n', '<leader>w', ':w<CR>')
+map('n', '<leader>q', ':q<CR>')
+map('n', '<leader>wq', ':wq<CR>')
+map('n', '<S-l> ', ':bnext<CR>')
+map('n', '<S-h> ', ':bprevious<CR>')
+-- map('n', '<Leader>t ', ':Vista coc<CR>')
 
-map('n', 'fg', ':Rg<CR>')
-map('n', 'fa', ':Ag<CR>')
-map('n', 'fb', ':Buffers<CR>')
-map('n', 'fl', ':BLines<CR>')
-map('n', 'fc', ':Commands<CR>')
+-- map('n', 'fg', ':Rg<CR>')
+-- map('n', 'fa', ':Ag<CR>')
+-- map('n', 'fb', ':Buffers<CR>')
+-- map('n', 'fl', ':BLines<CR>')
+-- map('n', 'fc', ':Commands<CR>')
 
 
 -- map('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>')
@@ -70,7 +81,7 @@ map('n', 'fc', ':Commands<CR>')
 -- Tagbar
 --
 -- Diagnostic keymaps
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
+-- vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
+-- vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
+-- vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
+-- vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
