@@ -13,7 +13,7 @@ local options = {
       "--column",
       "--smart-case",
     },
-    prompt_prefix = "   ",
+    prompt_prefix = "> ",
     selection_caret = "  ",
     entry_prefix = "  ",
     initial_mode = "insert",
@@ -64,8 +64,10 @@ require('telescope').setup(options)
 pcall(require('telescope').load_extension, 'fzf')
 
 -- See `:help telescope.builtin`
-vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
-vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
+vim.keymap.set('n', 'fc', require('telescope.builtin').commands, { desc = 'Get all commands' })
+vim.keymap.set('n', 'fk', require('telescope.builtin').keymaps, { desc = 'Get all keymaps' })
+
+vim.keymap.set('n', 'fb', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
 vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
@@ -74,10 +76,10 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer]' })
 
-vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
-vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
-vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
-vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
+vim.keymap.set('n', 'ff', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
+-- vim.keymap.set('n', '<leader>sh', require('telescope.builtin').git_commits, { desc = '[S]earch [H]elp' })
+vim.keymap.set('n', 'fl', require('telescope.builtin').current_buffer_fuzzy_find, { desc = '[S]earch in current buffer' })
+vim.keymap.set('n', 'fg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 
 local normal_hl = vim.api.nvim_get_hl_by_name('Normal', true)
