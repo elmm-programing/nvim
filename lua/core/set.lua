@@ -29,7 +29,6 @@ vim.o.relativenumber = true
 -- Set colorscheme
 vim.o.termguicolors = true
 vim.cmd [[
-colorscheme onedark
 let NERDTreeQuitOnOpen=1
 let g:system_copy#copy_command='xclip -sel clipboard'
 let g:system_copy#paste_command='xclip -sel clipboard -o'

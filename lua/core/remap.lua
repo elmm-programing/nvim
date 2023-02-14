@@ -1,14 +1,7 @@
+
 -----------------------------------------------------------
 -- Define keymaps of Neovim and installed plugins.
 -----------------------------------------------------------
-
-local function map(mode, lhs, rhs, opts)
-  local options = { noremap = true, silent = true }
-  if opts then
-    options = vim.tbl_extend('force', options, opts)
-  end
-  vim.api.nvim_set_keymap(mode, lhs, rhs, options)
-end
 
 -- Change leader to a comma
 vim.g.mapleader = ','
@@ -20,7 +13,7 @@ vim.g.maplocalleader = ','
 -----------------------------------------------------------
 
 -- Map Esc to kk
-map('i', 'kj', '<Esc>')
+vim.keymap.set('i', 'kj', '<Esc>')
 
 -- [[ Basic Keymaps ]]
 -- Set <space> as the leader key
@@ -38,10 +31,10 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 
 
 -- Move around splits using Ctrl + {h,j,k,l}
-map('n', '<C-H>', '<C-W>h')
-map('n', '<C-J>', '<C-W>j')
-map('n', '<C-K>', '<C-W>k')
-map('n', '<C-L>', '<C-W>l')
+vim.keymap.set('n', '<C-H>', '<C-W>h')
+vim.keymap.set('n', '<C-J>', '<C-W>j')
+vim.keymap.set('n', '<C-K>', '<C-W>k')
+vim.keymap.set('n', '<C-L>', '<C-W>l')
 
 
 
@@ -52,12 +45,12 @@ kj
 nnoremap  <silent> <s-tab>  :if &modifiable && !&readonly && &modified <CR> :write<CR> :endif<CR>:bprevious<CR>
 ]]
 
-map('n', '<leader>nt', ':NERDTreeFind<CR>')
-map('n', '<leader>w', ':w<CR>')
-map('n', '<leader>q', ':q<CR>')
-map('n', '<leader>wq', ':wq<CR>')
-map('n', '<S-l> ', ':bnext<CR>')
-map('n', '<S-h> ', ':bprevious<CR>')
+vim.keymap.set('n', '<leader>nt', ':NERDTreeFind<CR>')
+vim.keymap.set('n', '<leader>w', ':w<CR>')
+vim.keymap.set('n', '<leader>q', ':q<CR>')
+vim.keymap.set('n', '<leader>wq', ':wq<CR>')
+vim.keymap.set('n', '<S-l> ', ':bnext<CR>')
+vim.keymap.set('n', '<S-h> ', ':bprevious<CR>')
 -- map('n', '<Leader>t ', ':Vista coc<CR>')
 
 -- map('n', 'fg', ':Rg<CR>')
