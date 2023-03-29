@@ -3,6 +3,9 @@
 vim.cmd.packadd('packer.nvim')
 
 return require('packer').startup(function(use)
+    --nulls formatter
+    use "nvim-lua/plenary.nvim"
+
 	    -- Packer can manage itself
 	    use 'wbthomason/packer.nvim'
 
@@ -26,7 +29,8 @@ return require('packer').startup(function(use)
 	    use("mbbill/undotree")
 	    use("tpope/vim-fugitive")
 	    use("nvim-treesitter/nvim-treesitter-context");
-
+use( "jose-elias-alvarez/null-ls.nvim")
+    use("jay-babu/mason-null-ls.nvim")
 	    use {
 	        'VonHeikemen/lsp-zero.nvim',
 	        branch = 'v1.x',

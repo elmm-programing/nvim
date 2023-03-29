@@ -1,8 +1,29 @@
 local lsp = require("lsp-zero")
 
 lsp.preset("recommended")
-
--- lsp.ensure_installed({
+local null_ls = require 'null-ls'
+require("mason-null-ls").setup({
+    automatic_setup = true,
+automatic_installation = true,
+})
+null_ls.setup()
+-- require("mason-null-ls").setup({
+--     ensure_installed = {
+--         -- Opt to list sources here, when available in mason.
+--     },
+--     automatic_installation = false,
+--     automatic_setup = true, -- Recommended, but optional
+-- })
+-- require("null-ls").setup({
+--     sources = {
+--       require("null-ls").builtins.formatting.stylua,
+--         require("null-ls").builtins.diagnostics.eslint,
+--         require("null-ls").builtins.completion.spell,
+--         -- Anything not supported by mason.
+--     }
+-- })
+--
+-- require 'mason-null-ls'.setup_handlers()
 --   'tsserver'
 -- })
 --
