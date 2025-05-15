@@ -1,5 +1,12 @@
 return {
   {
+
+    "jay-babu/mason-nvim-dap.nvim",
+    config = function(_, opts)
+      require("mason-nvim-dap").setup(opts)
+    end,
+  },
+  {
     "mfussenegger/nvim-dap",
     recommended = true,
     desc = "Debugging support. Requires language specific adapters to be configured. (see lang extras)",
