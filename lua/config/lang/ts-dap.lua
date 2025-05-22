@@ -1,4 +1,21 @@
 local dap = require("dap")
+
+if not dap.adapters["pwa-chrome"] then
+  require("dap").adapters["pwa-chrome"] = {
+    type = "server",
+    host = "localhost",
+    port = "${port}",
+    executable = {
+      command = "node",
+      args = {
+        -- Make sure this path is correct for js-debug-adapter
+        LazyVim.get_pkg_path("js-debug-adapter", "/js-debug/src/dapDebugServer.js"),
+        "${port}",
+      },
+    },
+  }
+end
+
 if not dap.adapters["pwa-node"] then
   require("dap").adapters["pwa-node"] = {
     type = "server",
@@ -28,7 +45,7 @@ if not dap.adapters["node"] then
   end
 end
 
-local js_filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact" }
+local js_filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact", "vue" }
 
 local vscode = require("dap.ext.vscode")
 vscode.type_to_filetypes["node"] = js_filetypes
@@ -51,6 +68,29 @@ for _, language in ipairs(js_filetypes) do
         name = "Attach",
         processId = require("dap.utils").pick_process,
         cwd = "${workspaceFolder}",
+      },
+      {
+        name = "server: Nuxt",
+        type = "pwa-node",
+        request = "launch",
+        cwd = "${workspaceFolder}",
+        runtimeExecutable = "npm",
+        runtimeArgs = { "run", "dev" },
+        console = "integratedTerminal",
+      },
+      {
+        type = "chrome",
+        name = "Launch Chrome to debug client",
+        request = "launch",
+        url = function()
+          -- Corrected: Remove the invalid 'url' complete argument
+          return vim.fn.input("Enter URL to debug: ", "http://localhost:3000")
+        end,
+        sourceMaps = true,
+        protocol = "inspector",
+        port = 9222,
+        webRoot = "${workspaceFolder}",
+        runtimeExecutable = "/usr/bin/brave-browser-beta",
       },
     }
   end
