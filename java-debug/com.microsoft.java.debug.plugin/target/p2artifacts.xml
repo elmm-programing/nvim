@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<artifacts size='1'>
+  <artifact classifier='osgi.bundle' id='com.microsoft.java.debug.plugin' version='0.53.2'>
+    <properties size='9'>
+      <property name='artifact.size' value='3106915'/>
+      <property name='download.size' value='3106915'/>
+      <property name='download.checksum.sha-512' value='a74c13b6600cc3506c481780e3ecd1785d7b88049a92de6899748d2cf4e53017158a7ce343b3f17dbf806aeef07ba0b0d27996e695090a7ba143c45d1c3ce397'/>
+      <property name='download.checksum.sha-1' value='30316c9ba6110418e38855ededfc1cb9eafe25fb'/>
+      <property name='download.checksum.sha-256' value='803027c0ff6cb7d994fb4bed1082bbf02a6de8770d3f7b3ea7364136fc3d62ed'/>
+      <property name='maven-groupId' value='com.microsoft.java'/>
+      <property name='maven-artifactId' value='com.microsoft.java.debug.plugin'/>
+      <property name='maven-version' value='0.53.2'/>
+      <property name='maven-type' value='eclipse-plugin'/>
+    </properties>
+  </artifact>
+</artifacts>
