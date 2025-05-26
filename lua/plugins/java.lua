@@ -55,6 +55,25 @@ return {
         test = true, -- Assuming you want Java test capabilities
         settings = {
           java = {
+            configuration = {
+              runtimes = {
+                {
+                  name = "JavaSE-21", -- For projects targeting Java 23
+                  path = vim.fn.expand("~/.sdkman/candidates/java/21.0.4-tem/"), -- JDK 23 root (ensure 'current' points here)
+                },
+                {
+                  name = "JavaSE-17", -- For projects targeting Java 17
+                  -- IMPORTANT: Replace with the actual path to your SDKMAN Java 17 root
+                  path = vim.fn.expand("~/.sdkman/candidates/java/17.0.12-tem/"),
+                },
+                -- {
+                --   name = "JavaSE-11", -- For projects targeting Java 11
+                --   -- IMPORTANT: Replace with the actual path to your SDKMAN Java 11 root
+                --   path = vim.fn.expand("~/.sdkman/candidates/java/YOUR_JAVA_11_VERSION_DIR/"),
+                -- },
+                -- Add more runtimes if needed
+              },
+            },
             inlayHints = {
               parameterNames = {
                 enabled = "all",
