@@ -2,7 +2,7 @@ return {
   {
     "mfussenegger/nvim-jdtls",
     dependencies = { "folke/which-key.nvim" },
-    ft = java_filetypes, -- Assuming java_filetypes is defined elsewhere or you define it here
+    ft = "java", -- Assuming java_filetypes is defined elsewhere or you define it here
     opts = function()
       local cmd = { vim.fn.exepath("jdtls") }
       -- Note: The original opts.dap and opts.test are used in the config function below.
@@ -60,6 +60,7 @@ return {
                 {
                   name = "JavaSE-21", -- For projects targeting Java 23
                   path = vim.fn.expand("~/.sdkman/candidates/java/21.0.4-tem/"), -- JDK 23 root (ensure 'current' points here)
+                  default = true,
                 },
                 {
                   name = "JavaSE-17", -- For projects targeting Java 17
