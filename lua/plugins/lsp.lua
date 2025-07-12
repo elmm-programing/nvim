@@ -1,5 +1,112 @@
 return {
   {
+    "j-hui/fidget.nvim",
+    opts = {
+      -- options
+    },
+  },
+  {
+    "ahmedkhalf/project.nvim",
+    opts = {
+      manual_mode = false,
+
+      -- Methods of detecting the root directory. **"lsp"** uses the native neovim
+      -- lsp, while **"pattern"** uses vim-rooter like glob pattern matching. Here
+      -- order matters: if one is not detected, the other is used as fallback. You
+      -- can also delete or rearangne the detection methods.
+      detection_methods = { "lsp", "pattern" },
+
+      -- All the patterns used to detect root dir, when **"pattern"** is in
+      -- detection_methods
+      patterns = { ".git", "_darcs", ".hg", ".bzr", ".svn", "Makefile", "package.json" },
+
+      -- Table of lsp clients to ignore by name
+      -- eg: { "efm", ... }
+      ignore_lsp = {},
+
+      -- Don't calculate root dir on specific directories
+      -- Ex: { "~/.cargo/*", ... }
+      exclude_dirs = {},
+
+      -- Show hidden files in telescope
+      show_hidden = false,
+
+      -- When set to false, you will get a message when project.nvim changes your
+      -- directory.
+      silent_chdir = true,
+
+      -- What scope to change the directory, valid options are
+      -- * global (default)
+      -- * tab
+      -- * win
+      scope_chdir = "global",
+
+      -- Path where project.nvim will store the project history for use in
+      -- telescope
+      datapath = vim.fn.stdpath("data"),
+    },
+    event = "VeryLazy",
+    config = function(_, opts)
+      require("project_nvim").setup(opts)
+      local history = require("project_nvim.utils.history")
+      history.delete_project = function(project)
+        for k, v in pairs(history.recent_projects) do
+          if v == project.value then
+            history.recent_projects[k] = nil
+            return
+          end
+        end
+      end
+      LazyVim.on_load("telescope.nvim", function()
+        require("telescope").load_extension("projects")
+      end)
+    end,
+  },
+  {
+    "saghen/blink.cmp",
+    optional = true,
+    opts = {
+      snippets = {
+        preset = "luasnip",
+      },
+    },
+  },
+  {
+    "L3MON4D3/LuaSnip",
+    lazy = true,
+    build = (not LazyVim.is_win())
+        and "echo 'NOTE: jsregexp is optional, so not a big deal if it fails to build'; make install_jsregexp"
+      or nil,
+    dependencies = {
+      {
+        "rafamadriz/friendly-snippets",
+        config = function()
+          require("luasnip.loaders.from_vscode").lazy_load()
+          require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
+        end,
+      },
+    },
+    opts = {
+      history = true,
+      delete_check_events = "TextChanged",
+    },
+  },
+  {
+    "rcarriga/nvim-notify",
+  },
+  {
+    "cjodo/convert.nvim",
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+    },
+    keys = {
+      { "<leader>cn", "<cmd>ConvertFindNext<CR>", desc = "Find next convertable unit" },
+      { "<leader>cc", "<cmd>ConvertFindCurrent<CR>", desc = "Find convertable unit in current line" },
+      -- Add "v" to enable converting a selected region
+      { "<leader>ca", "<cmd>ConvertAll<CR>", mode = { "n", "v" }, desc = "Convert all of a specified unit" },
+    },
+  },
+  {
 
     "jay-babu/mason-nvim-dap.nvim",
     config = function(_, opts)
