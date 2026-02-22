@@ -25,10 +25,7 @@ return {
     'neovim/nvim-lspconfig',
     opts = function(_, opts)
       opts.servers = opts.servers or {}
-      -- Spring Boot LSP configuration
-      opts.servers.spring_boot = {}
-      -- Quarkus LSP configuration (Requires manual installation or external path mapping if not in Mason)
-      opts.servers.quarkus = {}
+      -- Framework-specific JDTLS extensions are handled in ftplugin/java.lua
     end,
   },
 
