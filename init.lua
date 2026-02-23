@@ -24,14 +24,11 @@ rtp:prepend(lazypath)
 
 -- [[ Configure and install plugins ]]
 require('lazy').setup({
-  -- Load base plugins
+  -- Automatically load all plugins from lua/plugins/*.lua
   { import = 'plugins' },
 
-  -- Load language specific configurations
+  -- Load language specific configurations from lua/plugins/lang/*.lua
   { import = 'plugins.lang' },
-
-  -- Load copied kickstart plugins
-  { import = 'kickstart.plugins' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the

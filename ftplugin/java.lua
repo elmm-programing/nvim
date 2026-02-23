@@ -1,4 +1,7 @@
-local jdtls = require('jdtls')
+local status, jdtls = pcall(require, 'jdtls')
+if not status then
+  return
+end
 
 local mason_path = vim.fn.stdpath('data') .. '/mason/packages'
 local bundles = {}

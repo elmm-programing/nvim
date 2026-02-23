@@ -17,7 +17,6 @@ return {
   -- The industry standard java configuration plugin
   {
     'mfussenegger/nvim-jdtls',
-    lazy = true, -- we will load this in ftplugin/java.lua
   },
 
   -- Configure Spring Boot LSP (JDTLS will be configured in ftplugin/java.lua)
