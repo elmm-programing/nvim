@@ -43,9 +43,9 @@ return {
     -- Toggle UI
     { '<leader>du', function() require('dapui').toggle() end, desc = 'Debug: See last session result.' },
 
-    -- Golang specific
-    { '<leader>dgt', function() require('dap-go').debug_test() end, desc = 'Debug: Go Test' },
-    { '<leader>dgl', function() require('dap-go').debug_last_test() end, desc = 'Debug: Go Last Test' },
+    -- Golang specific (use capital G to avoid overlapping with <leader>dg "goto line")
+    { '<leader>dGt', function() require('dap-go').debug_test() end, desc = 'Debug: Go Test' },
+    { '<leader>dGl', function() require('dap-go').debug_last_test() end, desc = 'Debug: Go Last Test' },
   },
   config = function()
     local dap = require 'dap'

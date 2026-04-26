@@ -3,6 +3,14 @@
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
+-- Disable unused providers to silence checkhealth warnings.
+-- Re-enable any of these by removing the line if you start using vim plugins
+-- that need the corresponding host (e.g. some Python or Ruby vim plugins).
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_node_provider = 0
+vim.g.loaded_python3_provider = 0
+
 -- Make line numbers default
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
