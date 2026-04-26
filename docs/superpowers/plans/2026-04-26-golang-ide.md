@@ -300,6 +300,8 @@ In `lua/plugins/lang/golang.lua`, find the last plugin block (the treesitter blo
       'ray-x/guihua.lua',
       'neovim/nvim-lspconfig',
       'nvim-treesitter/nvim-treesitter',
+      'folke/trouble.nvim',
+      'voldikss/vim-floaterm',
     },
     ft = { 'go', 'gomod', 'gosum', 'gotmpl', 'gowork' },
     build = ':lua require("go.install").update_all_sync()',
