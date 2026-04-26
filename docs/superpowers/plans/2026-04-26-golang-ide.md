@@ -1,6 +1,6 @@
 # Neovim Go IDE Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Turn the existing Neovim config at `~/.config/nvim` into a full Go IDE: tuned gopls, neotest-golang adapter, ray-x/go.nvim with code-gen keymaps, Go ftplugin, templ filetype detection, and removal of dead disabled DAP file.
 
@@ -34,7 +34,7 @@ Each task includes both. "Run test, expect FAIL" is replaced with "Run syntax ch
 **Files:**
 - Read-only: full repo
 
-- [ ] **Step 1: Confirm headless boot succeeds**
+- [x] **Step 1: Confirm headless boot succeeds**
 
 Run:
 ```bash
@@ -43,7 +43,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless "+Lazy! sync" "+qa" 2>&1 | tail
 
 Expected: No Lua errors. Plugin sync output may scroll; the final lines should be benign (e.g. `[Lazy]`/no error stack traces). If errors appear, stop and report — do not proceed until baseline is clean.
 
-- [ ] **Step 2: Confirm a known plugin file parses**
+- [x] **Step 2: Confirm a known plugin file parses**
 
 Run:
 ```bash
@@ -52,7 +52,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless -c 'luafile lua/plugins/lang/go
 
 Expected: No output (silent success). Any error means the file is already broken — fix before continuing.
 
-- [ ] **Step 3: Capture current gopls settings for diff comparison later**
+- [x] **Step 3: Capture current gopls settings for diff comparison later**
 
 Run:
 ```bash
@@ -70,7 +70,7 @@ No commit yet — this task only verifies baseline.
 **Files:**
 - Modify: `lua/plugins/lang/golang.lua` (lines 43-55, the `opts.servers.gopls = { ... }` block)
 
-- [ ] **Step 1: Open file and replace the gopls block**
+- [x] **Step 1: Open file and replace the gopls block**
 
 Replace lines 43-55:
 ```lua
@@ -131,7 +131,7 @@ with:
       }
 ```
 
-- [ ] **Step 2: Verify file parses**
+- [x] **Step 2: Verify file parses**
 
 Run:
 ```bash
@@ -140,7 +140,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless -c 'luafile lua/plugins/lang/go
 
 Expected: silent success.
 
-- [ ] **Step 3: Verify lazy.nvim accepts the spec**
+- [x] **Step 3: Verify lazy.nvim accepts the spec**
 
 Run:
 ```bash
@@ -149,7 +149,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless "+checkhealth lazy" "+qa" 2>&1 
 
 Expected: no output (no errors from lazy).
 
-- [ ] **Step 4: Smoke test in Neovim (manual)**
+- [x] **Step 4: Smoke test in Neovim (manual)**
 
 Open a real Go file (any `.go` file in any Go module on disk, e.g. clone `https://github.com/golang/example` if needed):
 ```bash
@@ -163,7 +163,7 @@ In Neovim:
 
 If any step fails: revert the block and inspect with `:LspLog`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd /Users/elmm12/.config/nvim && git add lua/plugins/lang/golang.lua && git commit -m "$(cat <<'EOF'
@@ -185,7 +185,7 @@ EOF
 **Files:**
 - Modify: `lua/plugins/neotest.lua`
 
-- [ ] **Step 1: Add neotest-golang to dependencies**
+- [x] **Step 1: Add neotest-golang to dependencies**
 
 In `lua/plugins/neotest.lua`, change lines 3-9:
 ```lua
@@ -210,7 +210,7 @@ to:
   },
 ```
 
-- [ ] **Step 2: Register the Go adapter alongside Rust**
+- [x] **Step 2: Register the Go adapter alongside Rust**
 
 In the same file, change lines 22-29:
 ```lua
@@ -235,7 +235,7 @@ to:
       },
 ```
 
-- [ ] **Step 3: Verify file parses**
+- [x] **Step 3: Verify file parses**
 
 Run:
 ```bash
@@ -244,7 +244,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless -c 'luafile lua/plugins/neotest
 
 Expected: silent success.
 
-- [ ] **Step 4: Install the new plugin**
+- [x] **Step 4: Install the new plugin**
 
 Run:
 ```bash
@@ -253,7 +253,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless "+Lazy! sync" "+qa" 2>&1 | tail
 
 Expected: lazy reports `neotest-golang` cloned. No error stack traces.
 
-- [ ] **Step 5: Smoke test in Neovim (manual)**
+- [x] **Step 5: Smoke test in Neovim (manual)**
 
 In a Go project with at least one `_test.go` file:
 ```bash
@@ -267,7 +267,7 @@ nvim /path/to/some_test.go
 
 If `<leader>tt` reports "no adapter for filetype go", re-check Step 2.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd /Users/elmm12/.config/nvim && git add lua/plugins/neotest.lua && git commit -m "$(cat <<'EOF'
@@ -288,7 +288,7 @@ EOF
 **Files:**
 - Modify: `lua/plugins/lang/golang.lua` (append a new plugin block before the closing `}`)
 
-- [ ] **Step 1: Append the go.nvim block**
+- [x] **Step 1: Append the go.nvim block**
 
 In `lua/plugins/lang/golang.lua`, find the last plugin block (the treesitter block ending around line 84) and after its closing `},` and before the file's final `}`, insert:
 
@@ -322,7 +322,7 @@ In `lua/plugins/lang/golang.lua`, find the last plugin block (the treesitter blo
 
 The result: file ends with `},\n}\n` where the new block is the last entry in the returned list.
 
-- [ ] **Step 2: Verify file parses**
+- [x] **Step 2: Verify file parses**
 
 Run:
 ```bash
@@ -331,7 +331,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless -c 'luafile lua/plugins/lang/go
 
 Expected: silent success.
 
-- [ ] **Step 3: Install the plugin**
+- [x] **Step 3: Install the plugin**
 
 Run:
 ```bash
@@ -340,7 +340,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless "+Lazy! sync" "+qa" 2>&1 | tail
 
 Expected: `go.nvim` and `guihua.lua` cloned.
 
-- [ ] **Step 4: Run go.nvim's installer for downstream tools**
+- [x] **Step 4: Run go.nvim's installer for downstream tools**
 
 Run:
 ```bash
@@ -349,7 +349,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless "+lua require('go.install').upd
 
 Expected: lines like `gomodifytags installed` etc. (no error). Mason already has most; this is idempotent.
 
-- [ ] **Step 5: Smoke test in Neovim (manual)**
+- [x] **Step 5: Smoke test in Neovim (manual)**
 
 Open a Go file:
 ```bash
@@ -363,7 +363,7 @@ In Neovim:
 
 If two `gopls` clients are listed, `lsp_cfg = false` was forgotten — fix Step 1.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd /Users/elmm12/.config/nvim && git add lua/plugins/lang/golang.lua && git commit -m "$(cat <<'EOF'
@@ -385,7 +385,7 @@ EOF
 **Files:**
 - Modify: `lua/plugins/lang/golang.lua` (the `go.nvim` block from Task 4)
 
-- [ ] **Step 1: Add a `keys` table to the go.nvim block**
+- [x] **Step 1: Add a `keys` table to the go.nvim block**
 
 In the `go.nvim` block, between `ft = { ... },` and `build = ...,`, insert:
 
@@ -409,7 +409,7 @@ In the `go.nvim` block, between `ft = { ... },` and `build = ...,`, insert:
 
 The `ft = 'go'` field tells lazy.nvim these keys only register in Go buffers (and additionally lazy-trigger `go.nvim` to load if not already loaded).
 
-- [ ] **Step 2: Verify file parses**
+- [x] **Step 2: Verify file parses**
 
 Run:
 ```bash
@@ -418,7 +418,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless -c 'luafile lua/plugins/lang/go
 
 Expected: silent success.
 
-- [ ] **Step 3: Verify lazy keymap registration**
+- [x] **Step 3: Verify lazy keymap registration**
 
 Run:
 ```bash
@@ -427,7 +427,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless "+Lazy! sync" "+qa" 2>&1 | tail
 
 Expected: no errors.
 
-- [ ] **Step 4: Smoke test in Neovim (manual)**
+- [x] **Step 4: Smoke test in Neovim (manual)**
 
 Open a Go file with a struct definition:
 ```bash
@@ -440,7 +440,7 @@ In Neovim:
 3. Inside a function returning `(T, error)`, after a call returning `error`, press `<leader>cgi` — confirm `if err != nil { return ... }` boilerplate appears.
 4. `:WhichKey <leader>cg` (if which-key is loaded) — confirm group label shows all 13 entries.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd /Users/elmm12/.config/nvim && git add lua/plugins/lang/golang.lua && git commit -m "$(cat <<'EOF'
@@ -462,7 +462,7 @@ EOF
 **Files:**
 - Create: `ftplugin/go.lua`
 
-- [ ] **Step 1: Create the ftplugin file**
+- [x] **Step 1: Create the ftplugin file**
 
 Create `ftplugin/go.lua` with exactly this content:
 ```lua
@@ -477,7 +477,7 @@ vim.opt_local.colorcolumn = '120'
 vim.opt_local.list = false
 ```
 
-- [ ] **Step 2: Verify file parses**
+- [x] **Step 2: Verify file parses**
 
 Run:
 ```bash
@@ -486,7 +486,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless -c 'luafile ftplugin/go.lua' -c
 
 Expected: silent success.
 
-- [ ] **Step 3: Smoke test in Neovim (manual)**
+- [x] **Step 3: Smoke test in Neovim (manual)**
 
 Open a Go file:
 ```bash
@@ -500,7 +500,7 @@ In Neovim:
 
 Then open a non-Go file (`.lua`, `.md`) — confirm those settings are NOT applied (buffer-local only).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd /Users/elmm12/.config/nvim && git add ftplugin/go.lua && git commit -m "$(cat <<'EOF'
@@ -521,7 +521,7 @@ EOF
 **Files:**
 - Modify: `lua/config/autocmds.lua`
 
-- [ ] **Step 1: Append filetype registration**
+- [x] **Step 1: Append filetype registration**
 
 Append to `lua/config/autocmds.lua` (after the existing `TextYankPost` autocmd, end of file):
 
@@ -531,7 +531,7 @@ Append to `lua/config/autocmds.lua` (after the existing `TextYankPost` autocmd, 
 vim.filetype.add({ extension = { templ = 'templ' } })
 ```
 
-- [ ] **Step 2: Verify file parses**
+- [x] **Step 2: Verify file parses**
 
 Run:
 ```bash
@@ -540,7 +540,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless -c 'luafile lua/config/autocmds
 
 Expected: silent success.
 
-- [ ] **Step 3: Smoke test in Neovim (manual)**
+- [x] **Step 3: Smoke test in Neovim (manual)**
 
 Create a throwaway `.templ` file:
 ```bash
@@ -559,7 +559,7 @@ In Neovim:
 2. `:LspInfo` — expected: `templ` LSP attached (after Mason installs it on first run).
 3. Treesitter highlighting visible (HTML inside `templ ... { ... }`).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd /Users/elmm12/.config/nvim && git add lua/config/autocmds.lua && git commit -m "$(cat <<'EOF'
@@ -580,7 +580,7 @@ EOF
 **Files:**
 - Delete: `lua/plugins/debug.lua`
 
-- [ ] **Step 1: Confirm it's a disabled duplicate**
+- [x] **Step 1: Confirm it's a disabled duplicate**
 
 Run:
 ```bash
@@ -596,14 +596,14 @@ cd /Users/elmm12/.config/nvim && grep -c "leoluz/nvim-dap-go" lua/plugins/dap.lu
 
 Expected: `1` (DAP-go is wired up in the live `dap.lua`).
 
-- [ ] **Step 2: Delete the file**
+- [x] **Step 2: Delete the file**
 
 Run:
 ```bash
 cd /Users/elmm12/.config/nvim && rm lua/plugins/debug.lua
 ```
 
-- [ ] **Step 3: Verify config still loads**
+- [x] **Step 3: Verify config still loads**
 
 Run:
 ```bash
@@ -612,7 +612,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless "+Lazy! sync" "+qa" 2>&1 | tail
 
 Expected: no errors. lazy may report `dap.lua` and `nvim-dap-go` (both still active).
 
-- [ ] **Step 4: Smoke test in Neovim (manual)**
+- [x] **Step 4: Smoke test in Neovim (manual)**
 
 ```bash
 nvim /path/to/some.go
@@ -624,7 +624,7 @@ In Neovim:
 
 If DAP keymaps no longer work, restore `debug.lua` and investigate; otherwise the deletion is safe.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd /Users/elmm12/.config/nvim && git add -A && git commit -m "$(cat <<'EOF'
@@ -645,7 +645,7 @@ EOF
 **Files:**
 - Read-only: full repo
 
-- [ ] **Step 1: Full headless boot from scratch**
+- [x] **Step 1: Full headless boot from scratch**
 
 Run:
 ```bash
@@ -654,7 +654,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless "+Lazy! sync" "+qa" 2>&1 | grep
 
 Expected: no output (no errors, no failures).
 
-- [ ] **Step 2: Health check**
+- [x] **Step 2: Health check**
 
 Run:
 ```bash
@@ -663,7 +663,7 @@ cd /Users/elmm12/.config/nvim && nvim --headless "+checkhealth" "+w! /tmp/health
 
 Expected: no `ERROR` lines from `lazy`, `mason`, `lspconfig`, `treesitter`, `dap`, `neotest`. Some warnings (e.g. missing optional providers) are fine.
 
-- [ ] **Step 3: End-to-end manual checklist**
+- [x] **Step 3: End-to-end manual checklist**
 
 Open a real Go project:
 ```bash
@@ -691,7 +691,7 @@ Run through this checklist (all should succeed):
 
 If any item fails: identify the responsible task above, fix, retest. Do not proceed to Step 4 until all pass.
 
-- [ ] **Step 4: No commit**
+- [x] **Step 4: No commit**
 
 This task is verification only.
 
@@ -702,11 +702,11 @@ This task is verification only.
 **Files:**
 - Modify: `docs/superpowers/plans/2026-04-26-golang-ide.md` (this file)
 
-- [ ] **Step 1: Mark all checkboxes complete**
+- [x] **Step 1: Mark all checkboxes complete**
 
-Open this plan in editor and convert remaining `- [ ]` to `- [x]` for completed tasks (the executing engineer typically does this incrementally).
+Open this plan in editor and convert remaining `- [x]` to `- [x]` for completed tasks (the executing engineer typically does this incrementally).
 
-- [ ] **Step 2: Commit completed plan**
+- [x] **Step 2: Commit completed plan**
 
 ```bash
 cd /Users/elmm12/.config/nvim && git add docs/superpowers/plans/2026-04-26-golang-ide.md && git commit -m "$(cat <<'EOF'
