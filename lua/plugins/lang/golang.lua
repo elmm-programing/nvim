@@ -107,4 +107,28 @@ return {
       vim.list_extend(opts.ensure_installed, { 'go', 'gomod', 'gowork', 'gosum', 'templ' })
     end,
   },
+
+  -- Go IDE features: code generation, build/run, coverage
+  {
+    'ray-x/go.nvim',
+    dependencies = {
+      'ray-x/guihua.lua',
+      'neovim/nvim-lspconfig',
+      'nvim-treesitter/nvim-treesitter',
+    },
+    ft = { 'go', 'gomod', 'gosum', 'gotmpl', 'gowork' },
+    build = ':lua require("go.install").update_all_sync()',
+    opts = {
+      lsp_cfg = false,
+      lsp_inlay_hints = { enable = false },
+      dap_debug = false,
+      luasnip = false,
+      trouble = true,
+      test_runner = 'go',
+      run_in_floaterm = true,
+    },
+    config = function(_, opts)
+      require('go').setup(opts)
+    end,
+  },
 }
