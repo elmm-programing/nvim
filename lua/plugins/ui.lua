@@ -22,7 +22,7 @@ return {
       icons = { mappings = vim.g.have_nerd_font },
       spec = {
         { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
-        { '<leader>cg', group = 'Go', ft = 'go' },
+        { '<leader>cg', group = 'Go', cond = function() return vim.bo.filetype == 'go' end },
         { '<leader>d', group = '[D]ebug' },
         { '<leader>r', group = '[R]eplace' },
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
