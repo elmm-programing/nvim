@@ -95,7 +95,7 @@ return {
       -- Run goimports, then golines (to wrap long lines), then gofumpt (for strict formatting)
       opts.formatters_by_ft.go = { 'goimports', 'golines', 'gofumpt' }
       -- Also format templ files if desired
-      opts.formatters_by_ft.templ = { 'prettier' } 
+      opts.formatters_by_ft.templ = { 'templ' }
     end,
   },
 
