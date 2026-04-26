@@ -122,9 +122,9 @@ Add to the `go.nvim` block (or as a separate `lua/plugins/lang/golang.lua` keyma
 | `<leader>cgt` | `:GoAddTag` | Add struct tags (json, yaml, …) |
 | `<leader>cgT` | `:GoRmTag` | Remove struct tags |
 | `<leader>cgI` | `:GoImpl` | Generate interface stubs |
-| `<leader>cga` | `:GoTestAdd` | Generate test for current func |
-| `<leader>cgA` | `:GoTestsAll` | Generate tests for whole file |
-| `<leader>cgm` | `:GoMod tidy` | Run `go mod tidy` |
+| `<leader>cga` | `:GoAddTest` | Generate test for current func |
+| `<leader>cgA` | `:GoAddAllTest` | Generate tests for whole file |
+| `<leader>cgm` | `:GoModTidy` | Run `go mod tidy` |
 | `<leader>cgr` | `:GoRun` | Run current package |
 | `<leader>cgb` | `:GoBuild` | Build current package |
 | `<leader>cgv` | `:GoCoverage -t` | Toggle coverage gutter |
