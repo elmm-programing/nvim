@@ -6,6 +6,7 @@ return {
     'antoinemadec/FixCursorHold.nvim',
     'nvim-treesitter/nvim-treesitter',
     'rouge8/neotest-rust',
+    'fredrikaverpil/neotest-golang',
   },
   keys = {
     { '<leader>tt', function() require('neotest').run.run() end,                                     desc = 'Test: Run Nearest' },
@@ -23,6 +24,9 @@ return {
       adapters = {
         require('neotest-rust')({
           args = { '--no-capture' },
+        }),
+        require('neotest-golang')({
+          dap_go_enabled = true,
         }),
       },
       status = { virtual_text = true },
