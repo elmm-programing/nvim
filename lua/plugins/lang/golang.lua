@@ -138,6 +138,7 @@ return {
     opts = {
       lsp_cfg = false,
       lsp_inlay_hints = { enable = false },
+      lsp_codelens = false, -- go.nvim calls vim.lsp.codelens.enable (Nvim 0.12+); on 0.11 it errors. Codelenses still work via gopls + <leader>cc.
       dap_debug = false,
       luasnip = false,
       trouble = true,
