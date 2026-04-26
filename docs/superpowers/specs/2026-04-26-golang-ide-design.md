@@ -63,13 +63,12 @@ lua/config/
 In `lua/plugins/lang/golang.lua`, expand the `gopls` settings block with:
 
 - `hints` — parameterNames, assignVariableTypes, constantValues, rangeVariableTypes, compositeLiteralFields, compositeLiteralTypes, functionTypeParameters (all `true`)
-- `codelenses` — gc_details, generate, regenerate_cgo, run_govulncheck, test, tidy, upgrade_dependency, vendor (all `true`)
+- `codelenses` — generate, regenerate_cgo, run_govulncheck, test, tidy, upgrade_dependency, vendor (all `true`)
 - `semanticTokens = true`
 - `experimentalPostfixCompletions = true`
 - `vulncheck = "Imports"`
-- `analyses` — extend with `nilness = true`, `shadow = true`, `useany = true`, `unusedwrite = true` (in addition to existing `unusedparams`)
+- `analyses` — extend with `nilness = true`, `shadow = true`, `any = true`, `unusedwrite = true` (in addition to existing `unusedparams`)
 - `directoryFilters = { "-.git", "-.vscode", "-.idea", "-node_modules" }` (avoid scanning generated dirs)
-- `completeUnimported = true`
 - `usePlaceholders = true` (already set)
 
 Inlay hints are toggled per-buffer via the existing `<leader>th` keymap in `lsp.lua` — no extra wiring needed.

@@ -96,7 +96,6 @@ with:
           gopls = {
             gofumpt = true,
             usePlaceholders = true,
-            completeUnimported = true,
             staticcheck = true,
             semanticTokens = true,
             experimentalPostfixCompletions = true,
@@ -107,7 +106,7 @@ with:
               unusedwrite = true,
               nilness = true,
               shadow = true,
-              useany = true,
+              any = true,
             },
             hints = {
               assignVariableTypes = true,
@@ -119,7 +118,6 @@ with:
               rangeVariableTypes = true,
             },
             codelenses = {
-              gc_details = false,
               generate = true,
               regenerate_cgo = true,
               run_govulncheck = true,
@@ -172,8 +170,8 @@ cd /Users/elmm12/.config/nvim && git add lua/plugins/lang/golang.lua && git comm
 feat(go): tighten gopls settings for IDE parity
 
 Adds inlay hints, codelenses, vulncheck, semantic tokens, postfix
-completions, additional analyses (nilness, shadow, useany, unusedwrite),
-directory filters, and completeUnimported.
+completions, additional analyses (nilness, shadow, any, unusedwrite),
+and directory filters.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF

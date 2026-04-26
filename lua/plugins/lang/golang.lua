@@ -45,7 +45,6 @@ return {
           gopls = {
             gofumpt = true,
             usePlaceholders = true,
-            completeUnimported = true,
             staticcheck = true,
             semanticTokens = true,
             experimentalPostfixCompletions = true,
@@ -56,7 +55,7 @@ return {
               unusedwrite = true,
               nilness = true,
               shadow = true,
-              useany = true,
+              any = true,
             },
             hints = {
               assignVariableTypes = true,
@@ -68,7 +67,6 @@ return {
               rangeVariableTypes = true,
             },
             codelenses = {
-              gc_details = false,
               generate = true,
               regenerate_cgo = true,
               run_govulncheck = true,
