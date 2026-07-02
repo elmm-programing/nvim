@@ -1,72 +1,92 @@
--- [[ Setting options ]]
--- See `:help vim.opt`
--- NOTE: You can change these options as you wish!
---  For more options, you can see `:help option-list`
+local opt = vim.opt
 
--- Disable unused providers to silence checkhealth warnings.
--- Re-enable any of these by removing the line if you start using vim plugins
--- that need the corresponding host (e.g. some Python or Ruby vim plugins).
-vim.g.loaded_perl_provider = 0
-vim.g.loaded_ruby_provider = 0
+-- Basic UI
+opt.number = true
+opt.relativenumber = true
+opt.cursorline = true
+opt.signcolumn = "yes"
+opt.laststatus = 3
+opt.showmode = false
+opt.pumheight = 10
+opt.termguicolors = true
+opt.scrolloff = 8
+opt.sidescrolloff = 8
+opt.mouse = "a"
+opt.wrap = false
+
+-- Indentation
+opt.tabstop = 2
+opt.shiftwidth = 2
+opt.expandtab = true
+opt.smartindent = true
+opt.list = true
+opt.listchars = { tab = "  ", trail = "·", nbsp = "␣" }
+opt.fillchars = { eob = " " }
+
+-- Search
+opt.hlsearch = false
+opt.incsearch = true
+opt.ignorecase = true
+opt.smartcase = true
+
+-- Files
+opt.swapfile = false
+opt.backup = false
+opt.undodir = vim.fn.stdpath("data") .. "/undodir"
+opt.undofile = true
+opt.clipboard = "unnamedplus"
+
+-- Window management
+opt.splitright = true
+opt.splitbelow = true
+
+-- Timing
+opt.updatetime = 250
+opt.timeoutlen = 300
+opt.ttimeoutlen = 0
+
+-- Completion
+opt.completeopt = "menu,menuone,noselect"
+opt.shortmess:append("c")
+
+-- Folding
+opt.foldmethod = "expr"
+opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+opt.foldlevel = 99
+opt.foldenable = true
+
+-- Sessions
+opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp" }
+opt.viewoptions = { "cursor", "folds", "slash", "unix" }
+
+-- Disable unused legacy providers (silences checkhealth warnings)
 vim.g.loaded_node_provider = 0
+vim.g.loaded_perl_provider = 0
 vim.g.loaded_python3_provider = 0
+vim.g.loaded_ruby_provider = 0
 
--- Make line numbers default
-vim.opt.number = true
--- You can also add relative line numbers, to help with jumping.
-vim.opt.relativenumber = true
+-- Performance optimizations
+opt.synmaxcol = 240 -- Limit syntax highlighting for performance
+opt.lazyredraw = true -- Don't redraw while executing macros
+opt.ttyfast = true -- Faster terminal rendering
+opt.redrawtime = 10000 -- Allow more time for syntax highlighting
+opt.maxmempattern = 50000 -- Increase memory for pattern matching
 
--- Enable mouse mode, can be useful for resizing splits for example!
-vim.opt.mouse = 'a'
+-- Disable built-in plugins we don't use
+vim.g.loaded_gzip = 1
+vim.g.loaded_matchit = 1
+vim.g.loaded_matchparen = 1
+vim.g.loaded_netrwPlugin = 1
+vim.g.loaded_tarPlugin = 1
+vim.g.loaded_tohtml = 1
+vim.g.loaded_tutor_mode_plugin = 1
+vim.g.loaded_zipPlugin = 1
 
--- Don't show the mode, since it's already in the status line
-vim.opt.showmode = false
+-- Better diff options
+opt.diffopt:append("linematch:60")
 
--- Sync clipboard between OS and Neovim.
---  Schedule the setting after `UiEnter` because it can increase startup-time.
---  Remove this option if you want your OS clipboard to remain independent.
---  See `:help 'clipboard'`
-vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
+-- Better spell checking
+opt.spelllang = { "en" }
 
--- Enable break indent
-vim.o.breakindent = true
-
--- Save undo history
-vim.o.undofile = true
-
--- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
-vim.o.ignorecase = true
-vim.o.smartcase = true
-
--- Keep signcolumn on by default
-vim.o.signcolumn = 'yes'
-
--- Decrease update time
-vim.o.updatetime = 250
-
--- Decrease mapped sequence wait time
-vim.o.timeoutlen = 300
-
--- Configure how new splits should be opened
-vim.o.splitright = true
-vim.o.splitbelow = true
-
--- Sets how neovim will display certain whitespace characters in the editor.
---  See `:help 'list'`
---  and `:help 'listchars'`
-vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-
--- Preview substitutions live, as you type!
-vim.o.inccommand = 'split'
-
--- Show which line your cursor is on
-vim.o.cursorline = true
-
--- Minimal number of screen lines to keep above and below the cursor.
-vim.o.scrolloff = 10
-
--- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
--- instead raise a dialog asking if you wish to save the current file(s)
--- See `:help 'confirm'`
-vim.o.confirm = true
+-- Auto-write changes
+opt.autowrite = true
