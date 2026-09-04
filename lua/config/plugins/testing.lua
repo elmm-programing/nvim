@@ -1,59 +1,38 @@
 return {
-  -- Testing framework for multiple languages
   {
     "nvim-neotest/neotest",
     dependencies = {
       "nvim-neotest/nvim-nio",
       "nvim-lua/plenary.nvim",
-      "antoinemadec/FixCursorHold.nvim",
       "nvim-treesitter/nvim-treesitter",
-      -- Go testing
-      {
-        "fredrikaverpil/neotest-golang",
-        dependencies = { "leoluz/nvim-dap-go" },
-        ft = "go",
-      },
-      -- TypeScript/JavaScript testing
-      {
-        "nvim-neotest/neotest-jest",
-        ft = { "typescript", "javascript", "typescriptreact", "javascriptreact", "vue" },
-      },
-      -- Vitest support
-      {
-        "marilari88/neotest-vitest",
-        ft = { "typescript", "javascript", "typescriptreact", "javascriptreact", "vue" },
-      },
-      -- Java testing
-      {
-        "rcasia/neotest-java",
-        ft = "java",
-      },
+      "fredrikaverpil/neotest-golang",
+      "nvim-neotest/neotest-jest",
+      "marilari88/neotest-vitest",
+      "rcasia/neotest-java",
     },
     opts = function()
       return {
         adapters = {
-          ["neotest-golang"] = {
+          require("neotest-golang")({
             runner = "go",
             args = { "-count=1", "-timeout=60s" },
-          },
-          ["neotest-jest"] = {
+          }),
+          require("neotest-jest")({
             jestCommand = "jest",
             jestConfigFile = "jest.config.js",
             env = { CI = true },
-            cwd = function(path)
+            cwd = function()
               return vim.fn.getcwd()
             end,
-          },
-          ["neotest-vitest"] = {
-            vitestCommand = "vitest",
-            vitestConfigFile = "vitest.config.ts",
-            cwd = function(path)
+          }),
+          require("neotest-vitest")({
+            cwd = function()
               return vim.fn.getcwd()
             end,
-          },
-          ["neotest-java"] = {
+          }),
+          require("neotest-java")({
             ignore_wrapper = false,
-          },
+          }),
         },
         status = { virtual_text = true },
         output = { open_on_run = true },
@@ -107,65 +86,23 @@ return {
     },
   },
 
-  -- HTTP client
+  -- HTTP client (keys only in .http buffers so they do not clash with refactoring)
   {
     "mistweaverco/kulala.nvim",
     ft = "http",
     keys = {
-      { "<leader>rr", function() require("kulala").run() end, desc = "Run HTTP request" },
-      { "<leader>rl", function() require("kulala").replay() end, desc = "Replay last request" },
+      { "<leader>rr", function() require("kulala").run() end, ft = "http", desc = "Run HTTP request" },
+      { "<leader>rl", function() require("kulala").replay() end, ft = "http", desc = "Replay last request" },
       { "<leader>rs", function() require("kulala").scratchpad() end, desc = "HTTP scratchpad" },
-      { "<leader>re", function() require("kulala").set_selected_env() end, desc = "Select HTTP env" },
+      { "<leader>re", function() require("kulala").set_selected_env() end, ft = "http", desc = "Select HTTP env" },
     },
     opts = {
       additional_curl_options = {},
-      -- ↓ Send mode (“external” or “body”)
-      -- "external": open results in external viewer
-      -- "body": open results in split window
       default_view = "body",
-      -- split direction
       split_direction = "vertical",
-      -- default env
       default_env = "dev",
-      -- enable/disable debug mode
       debug = false,
-      -- highlight requests with icon
-      icons = {
-        inlay = {
-          loading = "⏳",
-          done = "✅",
-          error = "❌",
-        },
-        lualine = "🐼",
-      },
-      -- enable/disable winbar
       winbar = true,
-      -- default show variable info in request line
-      default_show_info = true,
-      -- enable/disable request folding
-      enable_folding = false,
-      -- ↓ Request display options
-      request = {
-        -- enable/disable request title
-        show_title = true,
-        -- enable/disable request headers
-        show_headers = true,
-        -- enable/disable request body
-        show_body = true,
-        -- enable/disable request URL
-        show_url = true,
-        -- enable/disable request method
-        show_method = true,
-      },
-      -- ↓ Response display options
-      response = {
-        -- enable/disable response headers
-        show_headers = true,
-        -- enable/disable response body
-        show_body = true,
-        -- enable/disable response status
-        show_status = true,
-      },
     },
   },
 }

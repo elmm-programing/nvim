@@ -20,7 +20,7 @@ opt.shiftwidth = 2
 opt.expandtab = true
 opt.smartindent = true
 opt.list = true
-opt.listchars = { tab = "  ", trail = "·", nbsp = "␣" }
+opt.listchars = { tab = "▸ ", trail = "·", nbsp = "␣" }
 opt.fillchars = { eob = " " }
 
 -- Search

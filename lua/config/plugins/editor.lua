@@ -73,21 +73,19 @@ return {
       { "<leader>fk", ":Telescope keymaps<CR>", desc = "Keymaps", silent = true },
       { "<leader>fd", ":Telescope diagnostics<CR>", desc = "Diagnostics", silent = true },
       { "<leader>fr", ":Telescope resume<CR>", desc = "Resume picker", silent = true },
-      { "<leader>fs", ":Telescope lsp_document_symbols<CR>", desc = "Document symbols", silent = true },
-      { "<leader>fS", ":Telescope lsp_workspace_symbols<CR>", desc = "Workspace symbols", silent = true },
       { "<leader>ft", ":TodoTelescope<CR>", desc = "Todo comments", silent = true },
       { "<leader>gf", ":Telescope git_files<CR>", desc = "Git files", silent = true },
       { "<leader>gb", ":Telescope git_branches<CR>", desc = "Git branches", silent = true },
       { "<leader>gL", ":Telescope git_commits<CR>", desc = "Git log", silent = true },
     },
-    config = function(_, opts)
+    config = function()
       local telescope = require("telescope")
       local actions = require("telescope.actions")
 
       telescope.setup({
         defaults = {
-          prompt_prefix = " ",
-          selection_caret = " ",
+          prompt_prefix = "❯ ",
+          selection_caret = "▸ ",
           path_display = { "truncate" },
           sorting_strategy = "ascending",
           layout_config = {
@@ -171,6 +169,7 @@ return {
           "yaml",
           "toml",
           "markdown",
+          "markdown_inline",
           "lua",
           "vim",
           "vimdoc",
@@ -179,6 +178,7 @@ return {
           "bash",
           "dockerfile",
           "gitignore",
+          "http",
         },
         auto_install = true,
         highlight = { enable = true },
@@ -264,6 +264,7 @@ return {
       spec = {
         { "<leader>f", group = "file/find" },
         { "<leader>g", group = "git" },
+        { "<leader>G", group = "go" },
         { "<leader>b", group = "buffer" },
         { "<leader>c", group = "code" },
         { "<leader>d", group = "delete" },
@@ -273,7 +274,7 @@ return {
         { "<leader>x", group = "diagnostics" },
         { "<leader>h", group = "git hunk" },
         { "<leader>s", group = "search/symbols" },
-        { "<leader>r", group = "REST" },
+        { "<leader>r", group = "refactor/REST" },
         { "<leader>u", group = "ui" },
         { "<leader>q", group = "quit/session" },
         { "<leader>j", group = "java" },
@@ -295,15 +296,6 @@ return {
     event = "VeryLazy",
     opts = {
       signs = true,
-      keywords = {
-        FIX = { icon = " " },
-        TODO = { icon = " " },
-        HACK = { icon = " " },
-        WARN = { icon = " " },
-        PERF = { icon = " " },
-        NOTE = { icon = " " },
-        TEST = { icon = " " },
-      },
     },
   },
 
@@ -316,6 +308,7 @@ return {
         "neo-tree",
         "TelescopePrompt",
         "alpha",
+        "dashboard",
         "harpoon",
         "mason",
         "lazy",
@@ -337,6 +330,7 @@ return {
         filetypes = {
           "help",
           "alpha",
+          "dashboard",
           "neo-tree",
           "lazy",
           "mason",
@@ -378,23 +372,6 @@ return {
     event = "VeryLazy",
   },
 
-  -- Emmet support for HTML/CSS/Vue
-  {
-    "mattn/emmet-vim",
-    ft = { "html", "css", "scss", "vue", "javascript", "typescript", "javascriptreact", "typescriptreact" },
-    init = function()
-      vim.g.user_emmet_leader_key = "<C-y>"
-      vim.g.user_emmet_mode = "a"
-      vim.g.user_emmet_install_global = 0
-    end,
-  },
-
-  -- Better CSS/SCSS support for styled-components
-  {
-    "styled-components/vim-styled-components",
-    ft = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
-  },
-
   {
     "folke/snacks.nvim",
     priority = 1000,
@@ -403,8 +380,6 @@ return {
       notifier = { enabled = true },
       dashboard = { enabled = true },
       statuscolumn = { enabled = true },
-      -- DISABLED: image feature causes treesitter crashes in hover docs
-      -- See: https://github.com/folke/snacks.nvim/issues/xxx
       image = { enabled = false },
     },
   },

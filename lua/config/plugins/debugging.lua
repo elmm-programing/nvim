@@ -133,6 +133,8 @@ return {
         "prettier",
         "stylua",
         "google-java-format",
+        "vue-language-server",
+        "eslint_d",
       },
     },
   },

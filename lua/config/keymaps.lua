@@ -21,8 +21,8 @@ map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete buffer", silent = tr
 map("n", "<leader>bD", "<cmd>bdelete!<CR>", { desc = "Force delete buffer", silent = true })
 map("n", "<leader>bn", "<cmd>bnext<CR>", { desc = "Next buffer", silent = true })
 map("n", "<leader>bp", "<cmd>bprevious<CR>", { desc = "Previous buffer", silent = true })
-map("n", "<Tab>", "<cmd>bnext<CR>", { desc = "Next buffer", silent = true })
-map("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "Previous buffer", silent = true })
+map("n", "]b", "<cmd>bnext<CR>", { desc = "Next buffer", silent = true })
+map("n", "[b", "<cmd>bprevious<CR>", { desc = "Previous buffer", silent = true })
 
 -- Move lines
 map("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
@@ -68,14 +68,6 @@ map("n", "<leader>sm", function()
   vim.notify("Copied messages to clipboard", vim.log.levels.INFO)
 end, { desc = "Copy :messages to clipboard", silent = true })
 
--- Format via conform (LSP maps live on LspAttach)
-map("n", "<leader>cf", function()
-  require("conform").format({ async = true, lsp_fallback = true })
-end, { desc = "Format file" })
-map("v", "<leader>cf", function()
-  require("conform").format({ async = true, lsp_fallback = true })
-end, { desc = "Format selection" })
-
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Show diagnostic" })
 map("n", "[d", function()
   vim.diagnostic.jump({ count = -1, float = true })
@@ -105,9 +97,7 @@ map("n", "<leader>ul", function()
   vim.wo.relativenumber = vim.wo.number
 end, { desc = "Toggle line numbers" })
 
--- Quickfix / location list
-map("n", "[q", "<cmd>cprev<CR>", { desc = "Previous quickfix item", silent = true })
-map("n", "]q", "<cmd>cnext<CR>", { desc = "Next quickfix item", silent = true })
+-- Quickfix / location list (Trouble owns [q / ]q and falls back to these)
 map("n", "[Q", "<cmd>cfirst<CR>", { desc = "First quickfix item", silent = true })
 map("n", "]Q", "<cmd>clast<CR>", { desc = "Last quickfix item", silent = true })
 map("n", "[l", "<cmd>lprev<CR>", { desc = "Previous location list item", silent = true })
@@ -148,16 +138,17 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- Go maps use <leader>G so they do not steal git maps under <leader>g
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "go",
   callback = function()
-    map("n", "<leader>gt", "<cmd>GoTest<CR>", { buffer = true, desc = "Go test" })
-    map("n", "<leader>gr", "<cmd>GoRun<CR>", { buffer = true, desc = "Go run" })
-    map("n", "<leader>gF", "<cmd>GoFillStruct<CR>", { buffer = true, desc = "Go fill struct" })
-    map("n", "<leader>ga", "<cmd>GoAddTags<CR>", { buffer = true, desc = "Go add tags" })
-    map("n", "<leader>gA", "<cmd>GoAddTags json<CR>", { buffer = true, desc = "Go add json tags" })
-    map("n", "<leader>gm", "<cmd>GoModTidy<CR>", { buffer = true, desc = "Go mod tidy" })
-    map("n", "<leader>gi", "<cmd>GoIfErr<CR>", { buffer = true, desc = "Go if err != nil" })
+    map("n", "<leader>Gt", "<cmd>GoTest<CR>", { buffer = true, desc = "Go test" })
+    map("n", "<leader>Gr", "<cmd>GoRun<CR>", { buffer = true, desc = "Go run" })
+    map("n", "<leader>Gf", "<cmd>GoFillStruct<CR>", { buffer = true, desc = "Go fill struct" })
+    map("n", "<leader>Ga", "<cmd>GoAddTags<CR>", { buffer = true, desc = "Go add tags" })
+    map("n", "<leader>GA", "<cmd>GoAddTags json<CR>", { buffer = true, desc = "Go add json tags" })
+    map("n", "<leader>Gm", "<cmd>GoModTidy<CR>", { buffer = true, desc = "Go mod tidy" })
+    map("n", "<leader>Gi", "<cmd>GoIfErr<CR>", { buffer = true, desc = "Go if err != nil" })
   end,
 })
 

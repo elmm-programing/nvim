@@ -3,19 +3,25 @@ return {
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
+    dependencies = { "nvim-tree/nvim-web-devicons", "SmiteshP/nvim-navic" },
     opts = {
       options = {
         theme = "tokyonight",
         component_separators = { left = "", right = "" },
         section_separators = { left = "", right = "" },
-        disabled_filetypes = { statusline = { "dashboard", "alpha", "neo-tree" } },
+        disabled_filetypes = { statusline = { "dashboard", "alpha", "neo-tree", "snacks_dashboard" } },
       },
       sections = {
         lualine_a = { "mode" },
         lualine_b = { "branch", "diff", "diagnostics" },
         lualine_c = {
-          { "filename", path = 1, symbols = { modified = " ●", readonly = " ", unnamed = "" } },
+          { "filename", path = 1, symbols = { modified = " ●", readonly = " ", unnamed = "" } },
+          {
+            "navic",
+            cond = function()
+              return package.loaded["nvim-navic"] and require("nvim-navic").is_available()
+            end,
+          },
         },
         lualine_x = {
           { "encoding", cond = function() return vim.bo.fileencoding ~= "utf-8" end },
@@ -43,18 +49,18 @@ return {
         left_mouse_command = "buffer %d",
         middle_mouse_command = nil,
         indicator = { style = "icon", icon = "▎" },
-        buffer_close_icon = "",
+        buffer_close_icon = "󰅖",
         modified_icon = "●",
-        close_icon = "",
-        left_trunc_marker = "",
-        right_trunc_marker = "",
+        close_icon = "",
+        left_trunc_marker = "",
+        right_trunc_marker = "",
         max_name_length = 30,
         max_prefix_length = 30,
         tab_size = 21,
         diagnostics = "nvim_lsp",
         diagnostics_update_in_insert = false,
         diagnostics_indicator = function(count, level)
-          local icon = level:match("error") and " " or " "
+          local icon = level:match("error") and " " or " "
           return " " .. icon .. count
         end,
         offsets = {
@@ -191,57 +197,27 @@ return {
     init = function()
       vim.g.navic_silence = true
     end,
-    opts = function()
-      return {
-        separator = " ",
-        highlight = true,
-        depth_limit = 5,
-        icons = {
-          File = " ",
-          Module = " ",
-          Namespace = " ",
-          Package = " ",
-          Class = " ",
-          Method = " ",
-          Property = " ",
-          Field = " ",
-          Constructor = " ",
-          Enum = " ",
-          Interface = " ",
-          Function = " ",
-          Variable = " ",
-          Constant = " ",
-          String = " ",
-          Number = " ",
-          Boolean = " ",
-          Array = " ",
-          Object = " ",
-          Key = " ",
-          Null = " ",
-          EnumMember = " ",
-          Struct = " ",
-          Event = " ",
-          Operator = " ",
-          TypeParameter = " ",
-        },
-      }
-    end,
+    opts = {
+      separator = " › ",
+      highlight = true,
+      depth_limit = 5,
+    },
   },
 
-  -- Better UI (confirm dialogs, input dialogs)
+  -- vim.ui.input (rename, etc). vim.ui.select is handled by telescope-ui-select
   {
     "stevearc/dressing.nvim",
     lazy = true,
     init = function()
-      vim.ui.select = function(...)
-        require("lazy").load({ plugins = { "dressing.nvim" } })
-        return vim.ui.select(...)
-      end
       vim.ui.input = function(...)
         require("lazy").load({ plugins = { "dressing.nvim" } })
         return vim.ui.input(...)
       end
     end,
+    opts = {
+      input = { enabled = true },
+      select = { enabled = false },
+    },
   },
 
   -- Search and replace (spectre)
@@ -355,39 +331,6 @@ return {
     },
   },
 
-  -- Better comments
-  {
-    "numToStr/Comment.nvim",
-    keys = {
-      { "gcc", mode = "n", desc = "Comment toggle current line" },
-      { "gbc", mode = "n", desc = "Comment toggle current block" },
-      { "gc", mode = { "n", "v" }, desc = "Comment toggle linewise" },
-      { "gb", mode = { "n", "v" }, desc = "Comment toggle blockwise" },
-    },
-    opts = {
-      padding = true,
-      sticky = true,
-      ignore = nil,
-      toggler = {
-        line = "gcc",
-        block = "gbc",
-      },
-      opleader = {
-        line = "gc",
-        block = "gb",
-      },
-      extra = {
-        above = "gcO",
-        below = "gco",
-        eol = "gcA",
-      },
-      mappings = {
-        basic = true,
-        extra = true,
-      },
-    },
-  },
-
   -- Better quickfix
   {
     "kevinhwang91/nvim-bqf",
@@ -428,32 +371,6 @@ return {
             ["ctrl-c"] = "close",
           },
           extra_opts = { "--bind", "ctrl-o:toggle-all", "--prompt", " > " },
-        },
-      },
-    },
-  },
-
-  -- Better highlighting of words under cursor
-  {
-    "echasnovski/mini.cursorword",
-    event = "VeryLazy",
-    opts = {
-      delay = 100,
-    },
-  },
-
-  -- Better window management
-  {
-    "s1n7ax/nvim-window-picker",
-    version = "2.*",
-    event = "VeryLazy",
-    opts = {
-      hint = "floating-big-letter",
-      selection_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      filter_rules = {
-        bo = {
-          filetype = { "neo-tree", "neo-tree-popup", "notify", "quickfix" },
-          buftype = { "terminal", "quickfix", "nofile" },
         },
       },
     },

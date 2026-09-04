@@ -11,12 +11,9 @@ return {
         build = "make install_jsregexp",
         config = function()
           local ls = require("luasnip")
-          -- Load all VSCode-style snippets from friendly-snippets (lazy-loaded per filetype)
           require("luasnip.loaders.from_vscode").lazy_load()
-          -- Also allow loading snippets from your own ~/.config/nvim/snippets dir
           require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
 
-          -- Auto-jump through snippet tabstops
           ls.config.set_config({
             history = true,
             update_events = "TextChanged,TextChangedI",
@@ -26,11 +23,13 @@ return {
           })
         end,
       },
+      "folke/lazydev.nvim",
     },
     opts = {
       keymap = {
         preset = "default",
-        ["<Tab>"] = { "select_and_accept", "fallback" },
+        ["<Tab>"] = { "snippet_forward", "select_and_accept", "fallback" },
+        ["<S-Tab>"] = { "snippet_backward", "fallback" },
         ["<CR>"] = { "accept", "fallback" },
         ["<C-n>"] = { "select_next", "fallback" },
         ["<C-p>"] = { "select_prev", "fallback" },
@@ -40,7 +39,6 @@ return {
         ["<C-e>"] = { "hide", "fallback" },
       },
       appearance = {
-        use_nvim_cmp_as_default = true,
         nerd_font_variant = "mono",
       },
       completion = {
@@ -51,18 +49,20 @@ return {
           window = { border = "rounded" },
         },
         ghost_text = { enabled = true },
-        menu = { border = "rounded", draw = { padding = 4 } },
+        menu = { border = "rounded", draw = { padding = 1 } },
       },
       signature = { enabled = true, window = { border = "rounded" } },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
         per_filetype = {
-          go = { "lsp", "path", "snippets", "buffer" },
-          java = { "lsp", "path", "snippets", "buffer" },
-          vue = { "lsp", "path", "snippets", "buffer" },
-          typescript = { "lsp", "path", "snippets", "buffer" },
-          javascript = { "lsp", "path", "snippets", "buffer" },
-          lua = { "lsp", "path", "snippets", "buffer" },
+          lua = { inherit_defaults = true, "lazydev" },
+        },
+        providers = {
+          lazydev = {
+            name = "LazyDev",
+            module = "lazydev.integrations.blink",
+            score_offset = 100,
+          },
         },
       },
       snippets = { preset = "luasnip" },

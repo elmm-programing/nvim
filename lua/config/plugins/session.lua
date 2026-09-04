@@ -5,9 +5,6 @@ return {
     event = "BufReadPre",
     opts = {
       dir = vim.fn.stdpath("state") .. "/sessions/",
-      options = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp" },
-      pre_save = nil,
-      save_empty = false,
     },
     keys = {
       { "<Leader>qs", function() require("persistence").load() end, desc = "Restore Session" },
@@ -26,25 +23,14 @@ return {
       detection_methods = { "pattern", "lsp" },
       patterns = {
         ".git",
-        ".hg",
-        ".svn",
-        "_darcs",
-        ".bzr",
         "package.json",
         "go.mod",
         "pom.xml",
         "build.gradle",
-        "Cargo.toml",
-        "composer.json",
-        "pyproject.toml",
-        "setup.py",
-        "setup.cfg",
-        "requirements.txt",
-        "Makefile",
-        "CMakeLists.txt",
+        "build.gradle.kts",
+        "nuxt.config.ts",
+        "nuxt.config.js",
       },
-      ignore_lsp = {},
-      exclude_dirs = {},
       show_hidden = false,
       silent_chdir = true,
       scope_chdir = "global",
@@ -55,14 +41,6 @@ return {
     end,
     keys = {
       { "<leader>fp", "<cmd>Telescope projects<cr>", desc = "Find projects" },
-    },
-  },
-
-  -- Better file picker
-  {
-    "nvim-telescope/telescope.nvim",
-    dependencies = {
-      "nvim-telescope/telescope-project.nvim",
     },
   },
 
@@ -77,9 +55,19 @@ return {
         sync_on_ui_close = true,
       },
     },
+    config = function(_, opts)
+      require("harpoon"):setup(opts)
+    end,
     keys = {
-      { "<leader>a", function() require("harpoon"):list():append() end, desc = "Add to harpoon" },
-      { "<leader>A", function() require("harpoon").ui:toggle_quick_menu(require("harpoon"):list()) end, desc = "Harpoon menu" },
+      { "<leader>a", function() require("harpoon"):list():add() end, desc = "Add to harpoon" },
+      {
+        "<leader>A",
+        function()
+          local harpoon = require("harpoon")
+          harpoon.ui:toggle_quick_menu(harpoon:list())
+        end,
+        desc = "Harpoon menu",
+      },
       { "<leader>1", function() require("harpoon"):list():select(1) end, desc = "Harpoon file 1" },
       { "<leader>2", function() require("harpoon"):list():select(2) end, desc = "Harpoon file 2" },
       { "<leader>3", function() require("harpoon"):list():select(3) end, desc = "Harpoon file 3" },

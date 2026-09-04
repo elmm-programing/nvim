@@ -21,18 +21,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   desc = "Trim trailing whitespace on save",
 })
 
-vim.api.nvim_create_autocmd("BufWritePre", {
-  group = augroup,
-  pattern = "*.go",
-  callback = function()
-    pcall(vim.lsp.buf.code_action, {
-      apply = true,
-      context = { only = { "source.organizeImports" } },
-    })
-  end,
-  desc = "Organize Go imports on save",
-})
-
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup,
   pattern = { "json", "jsonc", "yaml", "yml", "toml", "markdown" },
@@ -50,6 +38,7 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.bo.tabstop = 4
     vim.bo.shiftwidth = 4
     vim.bo.expandtab = false
+    vim.b.sleuth_automatic = 0
   end,
   desc = "Go uses tabs with width 4",
 })
@@ -60,6 +49,7 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function()
     vim.bo.tabstop = 4
     vim.bo.shiftwidth = 4
+    vim.b.sleuth_automatic = 0
   end,
   desc = "Java uses 4-space indent",
 })
@@ -70,6 +60,7 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function()
     vim.bo.tabstop = 2
     vim.bo.shiftwidth = 2
+    vim.b.sleuth_automatic = 0
   end,
   desc = "Vue/TS/JS uses 2-space indent",
 })
@@ -131,6 +122,9 @@ vim.api.nvim_create_autocmd("TermOpen", {
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   group = augroup,
   callback = function()
+    if vim.g.nuxt_project then
+      return
+    end
     local cwd = vim.fn.getcwd()
     if vim.fn.filereadable(cwd .. "/nuxt.config.ts") == 1 or vim.fn.filereadable(cwd .. "/nuxt.config.js") == 1 then
       vim.g.nuxt_project = true
@@ -150,7 +144,11 @@ vim.api.nvim_create_autocmd("BufReadPre", {
   callback = function(args)
     local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(args.buf))
     if ok and stats and stats.size > 1024 * 1024 then
+      vim.b[args.buf].large_file = true
       vim.bo[args.buf].syntax = "off"
+      vim.bo[args.buf].swapfile = false
+      vim.bo[args.buf].undofile = false
+      vim.wo.foldmethod = "manual"
       vim.notify("Large file detected — syntax highlighting disabled", vim.log.levels.WARN)
     end
   end,

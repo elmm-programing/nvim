@@ -16,6 +16,16 @@ return {
   },
 
   {
+    "folke/lazydev.nvim",
+    ft = "lua",
+    opts = {
+      library = {
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+      },
+    },
+  },
+
+  {
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "williamboman/mason.nvim" },
     opts = {
@@ -33,27 +43,9 @@ return {
         "cssls",
         "emmet_ls",
       },
-      automatic_installation = true,
-      automatic_enable = {
-        exclude = { "jdtls" },
-      },
+      -- Enable servers from nvim-lspconfig after vim.lsp.config() runs
+      automatic_enable = false,
     },
-    config = function(_, opts)
-      require("mason-lspconfig").setup(opts)
-
-      vim.defer_fn(function()
-        local ok, registry = pcall(require, "mason-registry")
-        if not ok then
-          return
-        end
-        if not registry.is_installed("vue-language-server") then
-          vim.notify("Installing vue-language-server (volar)...", vim.log.levels.INFO)
-          pcall(function()
-            registry.get_package("vue-language-server"):install()
-          end)
-        end
-      end, 1000)
-    end,
   },
 
   {
@@ -63,7 +55,7 @@ return {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
       { "j-hui/fidget.nvim", opts = {} },
-      { "SmiteshP/nvim-navic", opts = { highlight = true } },
+      "SmiteshP/nvim-navic",
       "b0o/schemastore.nvim",
     },
     config = function()
@@ -78,15 +70,17 @@ return {
       }
 
       local signs = { Error = "", Warn = "", Hint = "", Info = "" }
-      for type, icon in pairs(signs) do
-        local hl = "DiagnosticSign" .. type
-        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-      end
-
       vim.diagnostic.config({
         virtual_text = { spacing = 4, prefix = "●" },
         float = { source = "always", border = "rounded", header = "", prefix = "" },
-        signs = true,
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = signs.Error,
+            [vim.diagnostic.severity.WARN] = signs.Warn,
+            [vim.diagnostic.severity.HINT] = signs.Hint,
+            [vim.diagnostic.severity.INFO] = signs.Info,
+          },
+        },
         underline = true,
         update_in_insert = false,
         severity_sort = true,
@@ -108,19 +102,19 @@ return {
           end
 
           vim.keymap.set("n", "gd", function()
-            tb.lsp_definitions({ jump_type = "never", reuse_win = true })
+            tb.lsp_definitions({ reuse_win = true })
           end, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
           vim.keymap.set("n", "gD", function()
-            tb.lsp_declarations({ jump_type = "never", reuse_win = true })
+            tb.lsp_declarations({ reuse_win = true })
           end, vim.tbl_extend("force", opts, { desc = "Go to declaration" }))
           vim.keymap.set("n", "gr", function()
             tb.lsp_references({ include_current_line = false })
           end, vim.tbl_extend("force", opts, { desc = "Find references" }))
           vim.keymap.set("n", "gi", function()
-            tb.lsp_implementations({ jump_type = "never", reuse_win = true })
+            tb.lsp_implementations({ reuse_win = true })
           end, vim.tbl_extend("force", opts, { desc = "Go to implementation" }))
           vim.keymap.set("n", "gy", function()
-            tb.lsp_type_definitions({ jump_type = "never", reuse_win = true })
+            tb.lsp_type_definitions({ reuse_win = true })
           end, vim.tbl_extend("force", opts, { desc = "Go to type definition" }))
           vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover" }))
           vim.keymap.set("n", "gK", vim.lsp.buf.signature_help, vim.tbl_extend("force", opts, { desc = "Signature help" }))
@@ -169,6 +163,7 @@ return {
           end
 
           if client and client.server_capabilities.inlayHintProvider then
+            vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
             vim.keymap.set("n", "<leader>uh", function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
             end, vim.tbl_extend("force", opts, { desc = "Toggle inlay hints" }))
@@ -246,10 +241,7 @@ return {
           Lua = {
             runtime = { version = "LuaJIT" },
             diagnostics = { globals = { "vim" } },
-            workspace = {
-              checkThirdParty = false,
-              library = { vim.env.VIMRUNTIME },
-            },
+            workspace = { checkThirdParty = false },
             telemetry = { enable = false },
             completion = { callSnippet = "Replace" },
           },
@@ -257,23 +249,31 @@ return {
       })
 
       local json_settings = { json = { validate = { enable = true } } }
+      local yaml_settings = {
+        yaml = {
+          format = { enable = true },
+          validate = true,
+          schemaStore = { enable = false, url = "" },
+        },
+      }
       local ok_store, schemastore = pcall(require, "schemastore")
       if ok_store then
         json_settings.json.schemas = schemastore.json.schemas()
+        yaml_settings.yaml.schemas = schemastore.yaml.schemas()
       end
       vim.lsp.config("jsonls", {
         capabilities = capabilities,
         settings = json_settings,
+      })
+      vim.lsp.config("yamlls", {
+        capabilities = capabilities,
+        settings = yaml_settings,
       })
 
       vim.lsp.config("tailwindcss", { capabilities = capabilities })
       vim.lsp.config("html", { capabilities = capabilities })
       vim.lsp.config("cssls", { capabilities = capabilities })
       vim.lsp.config("emmet_ls", { capabilities = capabilities })
-      vim.lsp.config("yamlls", {
-        capabilities = capabilities,
-        settings = { yaml = { format = { enable = true } } },
-      })
       vim.lsp.config("dockerls", { capabilities = capabilities })
       vim.lsp.config("bashls", { capabilities = capabilities })
 
