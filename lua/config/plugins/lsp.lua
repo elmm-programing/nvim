@@ -34,6 +34,9 @@ return {
         "emmet_ls",
       },
       automatic_installation = true,
+      automatic_enable = {
+        exclude = { "jdtls", "rust_analyzer" },
+      },
     },
     config = function(_, opts)
       require("mason-lspconfig").setup(opts)
@@ -258,34 +261,6 @@ return {
         },
       })
 
-      -- Java
-      vim.lsp.config("jdtls", {
-        capabilities = capabilities,
-        settings = {
-          java = {
-            eclipse = { downloadSources = true },
-            configuration = { updateBuildConfiguration = "automatic" },
-            maven = { downloadSources = true },
-            implementationsCodeLens = { enabled = true },
-            referencesCodeLens = { enabled = true },
-            references = { includeDecompile = true },
-            format = { enabled = true },
-            signatureHelp = { enabled = true },
-            completion = {
-              favoriteMembers = { "java.util.Collections", "java.util.List", "java.util.Map" },
-              filteredTypes = {
-                "com.sun.*",
-                "io.micrometer.shaded.*",
-                "java.awt.*",
-                "jdk.*",
-                "sun.*",
-              },
-            },
-            sources = { organizeImports = { starThreshold = 5000, staticStarThreshold = 3 } },
-          },
-        },
-      })
-
       -- Lua
       vim.lsp.config("lua_ls", {
         capabilities = capabilities,
@@ -315,9 +290,9 @@ return {
       vim.lsp.config("dockerls", { capabilities = capabilities })
       vim.lsp.config("bashls", { capabilities = capabilities })
 
-      -- Enable all LSP servers
+      -- jdtls is started by nvim-jdtls; rust-analyzer is started by rustaceanvim.
       vim.lsp.enable({
-        "gopls", "ts_ls", "volar", "jdtls", "lua_ls",
+        "gopls", "ts_ls", "volar", "lua_ls",
         "tailwindcss", "html", "cssls", "emmet_ls",
         "yamlls", "dockerls", "bashls",
       })

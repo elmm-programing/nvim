@@ -326,7 +326,6 @@ return {
       { "<leader>\\", "<cmd>ToggleTerm direction=float<cr>", desc = "Toggle floating terminal" },
       { "<leader>th", "<cmd>ToggleTerm direction=horizontal<cr>", desc = "Toggle horizontal terminal" },
       { "<leader>tv", "<cmd>ToggleTerm direction=vertical<cr>", desc = "Toggle vertical terminal" },
-      { "<leader>tf", "<cmd>ToggleTerm direction=float<cr>", desc = "Toggle floating terminal" },
     },
     opts = {
       size = function(term)

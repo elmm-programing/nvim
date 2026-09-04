@@ -157,6 +157,8 @@ return {
           "gomod",
           "gosum",
           "gotmpl",
+          "rust",
+          "ron",
           "java",
           "javascript",
           "typescript",

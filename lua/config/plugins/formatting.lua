@@ -25,6 +25,7 @@ return {
         markdown = { "prettier" },
         go = { "gofumpt", "goimports" },
         java = { "google-java-format" },
+        rust = { "rustfmt" },
         lua = { "stylua" },
       },
       format_on_save = {
