@@ -78,7 +78,7 @@ return {
       { "<leader>ft", ":TodoTelescope<CR>", desc = "Todo comments", silent = true },
       { "<leader>gf", ":Telescope git_files<CR>", desc = "Git files", silent = true },
       { "<leader>gb", ":Telescope git_branches<CR>", desc = "Git branches", silent = true },
-      { "<leader>gc", ":Telescope git_commits<CR>", desc = "Git commits", silent = true },
+      { "<leader>gL", ":Telescope git_commits<CR>", desc = "Git log", silent = true },
     },
     config = function(_, opts)
       local telescope = require("telescope")
@@ -136,6 +136,7 @@ return {
 
       pcall(telescope.load_extension, "fzf")
       pcall(telescope.load_extension, "ui-select")
+      pcall(telescope.load_extension, "projects")
     end,
   },
 
@@ -185,10 +186,10 @@ return {
         incremental_selection = {
           enable = true,
           keymaps = {
-            init_selection = "<C-n>",
-            node_incremental = "<C-n>",
-            node_decremental = "<C-p>",
-            scope_incremental = "<C-s>",
+            init_selection = "gnn",
+            node_incremental = "grn",
+            node_decremental = "grm",
+            scope_incremental = "grc",
           },
         },
         textobjects = {
@@ -227,14 +228,17 @@ return {
           swap = {
             enable = true,
             swap_next = {
-              ["<leader>a"] = "@parameter.inner",
+              [">p"] = "@parameter.inner",
             },
             swap_previous = {
-              ["<leader>A"] = "@parameter.inner",
+              ["<p"] = "@parameter.inner",
             },
           },
         },
       })
+      pcall(function()
+        require("nvim-ts-autotag").setup()
+      end)
     end,
   },
 
@@ -257,49 +261,29 @@ return {
     opts = {
       icons = { breadcrumb = "»", separator = "➜", group = "+", keys = { Space = "␣" } },
       win = { border = "rounded" },
-      layout = { align = "center", height = { min = 4, max = 25 } },
-      filter = function(_) return true end,
-      plugins = {
-        marks = true,
-        registers = true,
-        spelling = { enabled = true, suggestions = 20 },
-        presets = {
-          operators = true,
-          motions = true,
-          text_objects = true,
-          windows = true,
-          nav = true,
-          z = true,
-          g = true,
-        },
-      },
-      defaults = {
-        mode = { "n", "v" },
-        ["<leader>"] = { name = "+leader" },
-        ["<leader>f"] = { name = "+file/find" },
-        ["<leader>g"] = { name = "+git/goto" },
-        ["<leader>b"] = { name = "+buffer" },
-        ["<leader>c"] = { name = "+code/lsp" },
-        ["<leader>d"] = { name = "+delete/debug" },
-        ["<leader>D"] = { name = "+debug" },
-        ["<leader>w"] = { name = "+workspace/diagnostics/save" },
-        ["<leader>t"] = { name = "+toggle/test" },
-        ["<leader>x"] = { name = "+diagnostics/quickfix" },
-        ["<leader>h"] = { name = "+hunk/help" },
-        ["<leader>s"] = { name = "+surround/search/symbols" },
-        ["<leader>r"] = { name = "+rename" },
-        ["<leader>o"] = { name = "+open" },
-        ["<leader>u"] = { name = "+ui/undo" },
-        ["g"] = { name = "+goto" },
-        ["gs"] = { name = "+surround" },
-        ["["] = { name = "+prev" },
-        ["]"] = { name = "+next" },
+      spec = {
+        { "<leader>f", group = "file/find" },
+        { "<leader>g", group = "git" },
+        { "<leader>b", group = "buffer" },
+        { "<leader>c", group = "code" },
+        { "<leader>d", group = "delete" },
+        { "<leader>D", group = "debug" },
+        { "<leader>w", group = "workspace/save" },
+        { "<leader>t", group = "test" },
+        { "<leader>x", group = "diagnostics" },
+        { "<leader>h", group = "git hunk" },
+        { "<leader>s", group = "search/symbols" },
+        { "<leader>r", group = "REST" },
+        { "<leader>u", group = "ui" },
+        { "<leader>q", group = "quit/session" },
+        { "<leader>j", group = "java" },
+        { "<leader><tab>", group = "tabs" },
       },
     },
     keys = {
       {
         "<leader>?",
-        function() require("which-key").show({ glob = true }) end,
+        function() require("which-key").show({ global = true }) end,
         desc = "All keymaps",
       },
     },
@@ -402,24 +386,6 @@ return {
       vim.g.user_emmet_leader_key = "<C-y>"
       vim.g.user_emmet_mode = "a"
       vim.g.user_emmet_install_global = 0
-    end,
-  },
-
-  -- JSON schema support
-  {
-    "b0o/schemastore.nvim",
-    ft = { "json", "jsonc" },
-    lazy = true,
-  },
-
-  -- Tailwind CSS color preview
-  {
-    "roobert/tailwindcss-colorizer-cmp.nvim",
-    ft = { "html", "vue", "typescript", "javascript", "typescriptreact", "javascriptreact", "css", "scss" },
-    config = function()
-      require("tailwindcss-colorizer-cmp").setup({
-        color_square_width = 2,
-      })
     end,
   },
 

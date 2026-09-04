@@ -107,63 +107,15 @@ return {
     },
   },
 
-  -- REST client for API testing
-  {
-    "rest-nvim/rest.nvim",
-    version = "*",
-    ft = "http",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    keys = {
-      { "<leader>rr", "<cmd>Rest run<cr>", desc = "Run request under cursor" },
-      { "<leader>rl", "<cmd>Rest run last<cr>", desc = "Run last request" },
-      { "<leader>rp", "<cmd>Rest preview<cr>", desc = "Preview request" },
-    },
-    opts = {
-      result = {
-        behavior = {
-          decode_url = true,
-          show_info = {
-            url = true,
-            headers = true,
-            http_info = true,
-            curl_command = true,
-          },
-          statistics = {
-            enable = true,
-            timeout = 5000,
-          },
-          formatters = {
-            json = "jq",
-            html = function(body)
-              return vim.fn.system({ "tidy", "-i", "-q", "-" }, body)
-            end,
-          },
-        },
-        keybinds = {
-          buffer_local = true,
-        },
-      },
-      highlight = {
-        enable = true,
-        timeout = 150,
-      },
-      jump = {
-        behavior = "closest",
-        request = {
-          above = "previous",
-          below = "next",
-        },
-      },
-    },
-  },
-
-  -- HTTP syntax highlighting
+  -- HTTP client
   {
     "mistweaverco/kulala.nvim",
     ft = "http",
     keys = {
-      { "<leader>rs", function() require("kulala").scratchpad() end, desc = "Open scratchpad" },
-      { "<leader>re", function() require("kulala").set_selected_env() end, desc = "Select env" },
+      { "<leader>rr", function() require("kulala").run() end, desc = "Run HTTP request" },
+      { "<leader>rl", function() require("kulala").replay() end, desc = "Replay last request" },
+      { "<leader>rs", function() require("kulala").scratchpad() end, desc = "HTTP scratchpad" },
+      { "<leader>re", function() require("kulala").set_selected_env() end, desc = "Select HTTP env" },
     },
     opts = {
       additional_curl_options = {},

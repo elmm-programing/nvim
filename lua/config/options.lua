@@ -24,7 +24,7 @@ opt.listchars = { tab = "  ", trail = "·", nbsp = "␣" }
 opt.fillchars = { eob = " " }
 
 -- Search
-opt.hlsearch = false
+opt.hlsearch = true
 opt.incsearch = true
 opt.ignorecase = true
 opt.smartcase = true
@@ -65,17 +65,13 @@ vim.g.loaded_perl_provider = 0
 vim.g.loaded_python3_provider = 0
 vim.g.loaded_ruby_provider = 0
 
--- Performance optimizations
-opt.synmaxcol = 240 -- Limit syntax highlighting for performance
-opt.lazyredraw = true -- Don't redraw while executing macros
-opt.ttyfast = true -- Faster terminal rendering
-opt.redrawtime = 10000 -- Allow more time for syntax highlighting
-opt.maxmempattern = 50000 -- Increase memory for pattern matching
+-- Performance
+opt.synmaxcol = 240
+opt.redrawtime = 10000
+opt.maxmempattern = 50000
 
--- Disable built-in plugins we don't use
+-- Disable unused built-in plugins (keep matchit/matchparen)
 vim.g.loaded_gzip = 1
-vim.g.loaded_matchit = 1
-vim.g.loaded_matchparen = 1
 vim.g.loaded_netrwPlugin = 1
 vim.g.loaded_tarPlugin = 1
 vim.g.loaded_tohtml = 1

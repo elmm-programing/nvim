@@ -1,254 +1,198 @@
 local map = vim.keymap.set
 
 -- Clear search highlight
-map("n", "<Esc>", ":nohlsearch<CR>", { silent = true })
+map("n", "<Esc>", "<cmd>nohlsearch<CR>", { silent = true })
 
--- Window navigation
+-- Window navigation (do not overwrite with LSP; signature help is gK / <C-s> in insert)
 map("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
 map("n", "<C-j>", "<C-w>j", { desc = "Move to lower window" })
 map("n", "<C-k>", "<C-w>k", { desc = "Move to upper window" })
 map("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
 
 -- Window resizing
-map("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase window height", silent = true })
-map("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease window height", silent = true })
-map("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width", silent = true })
-map("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase window width", silent = true })
-
--- Equalize windows
+map("n", "<C-Up>", "<cmd>resize +2<CR>", { desc = "Increase window height", silent = true })
+map("n", "<C-Down>", "<cmd>resize -2<CR>", { desc = "Decrease window height", silent = true })
+map("n", "<C-Left>", "<cmd>vertical resize -2<CR>", { desc = "Decrease window width", silent = true })
+map("n", "<C-Right>", "<cmd>vertical resize +2<CR>", { desc = "Increase window width", silent = true })
 map("n", "<leader>=", "<C-w>=", { desc = "Equalize window sizes" })
 
 -- Buffer management
-map("n", "<leader>bd", ":bdelete<CR>", { desc = "Delete buffer", silent = true })
-map("n", "<leader>bD", ":bdelete!<CR>", { desc = "Force delete buffer", silent = true })
-map("n", "<leader>bn", ":bnext<CR>", { desc = "Next buffer", silent = true })
-map("n", "<leader>bp", ":bprevious<CR>", { desc = "Previous buffer", silent = true })
-map("n", "<leader>bl", ":blast<CR>", { desc = "Last buffer", silent = true })
-map("n", "<leader>bf", ":bfirst<CR>", { desc = "First buffer", silent = true })
-map("n", "<Tab>", ":bnext<CR>", { desc = "Next buffer", silent = true })
-map("n", "<S-Tab>", ":bprevious<CR>", { desc = "Previous buffer", silent = true })
+map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete buffer", silent = true })
+map("n", "<leader>bD", "<cmd>bdelete!<CR>", { desc = "Force delete buffer", silent = true })
+map("n", "<leader>bn", "<cmd>bnext<CR>", { desc = "Next buffer", silent = true })
+map("n", "<leader>bp", "<cmd>bprevious<CR>", { desc = "Previous buffer", silent = true })
+map("n", "<Tab>", "<cmd>bnext<CR>", { desc = "Next buffer", silent = true })
+map("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "Previous buffer", silent = true })
 
 -- Move lines
 map("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
 map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
 -- Quick save and quit
-map("n", "<leader>w", ":w<CR>", { desc = "Save file", silent = true })
-map("n", "<leader>q", ":q<CR>", { desc = "Quit", silent = true })
-map("n", "<leader>Q", ":qa!<CR>", { desc = "Force quit all", silent = true })
-map("n", "<leader>W", ":wa<CR>", { desc = "Save all files", silent = true })
+map("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file", silent = true })
+map("n", "<leader>q", "<cmd>q<CR>", { desc = "Quit", silent = true })
+map("n", "<leader>Q", "<cmd>qa!<CR>", { desc = "Force quit all", silent = true })
+map("n", "<leader>W", "<cmd>wa<CR>", { desc = "Save all files", silent = true })
 
 -- Center search results
 map("n", "n", "nzzzv", { desc = "Next search result centered" })
 map("n", "N", "Nzzzv", { desc = "Previous search result centered" })
 
--- Better paste
-map("x", "<leader>p", '"_dP', { desc = "Paste without overwriting register" })
-map({ "n", "v" }, "<leader>y", '"+y', { desc = "Yank to system clipboard" })
-map("n", "<leader>Y", '"+Y', { desc = "Yank line to system clipboard" })
+-- Delete to void register (clipboard already uses unnamedplus)
 map({ "n", "v" }, "<leader>d", '"_d', { desc = "Delete to void register" })
+map("x", "<leader>p", '"_dP', { desc = "Paste without overwriting register" })
 
 -- Disable Q (ex mode)
 map("n", "Q", "<nop>")
 
--- Quick escape from insert mode with kj
+-- Quick escape from insert mode
 map("i", "kj", "<Esc>", { desc = "Exit insert mode", silent = true })
 
--- Telescope shortcuts (main ones)
-map("n", "<leader><leader>", ":Telescope find_files<CR>", { desc = "Find files (Telescope)", silent = true })
-map("n", "<leader>/", ":Telescope live_grep<CR>", { desc = "Grep search (Telescope)", silent = true })
+-- Telescope
+map("n", "<leader><leader>", "<cmd>Telescope find_files<CR>", { desc = "Find files", silent = true })
+map("n", "<leader>/", "<cmd>Telescope live_grep<CR>", { desc = "Grep search", silent = true })
 
 -- Undotree
-map("n", "<leader>u", ":UndotreeToggle<CR>", { desc = "Toggle undotree" })
+map("n", "<leader>uu", "<cmd>UndotreeToggle<CR>", { desc = "Toggle undotree" })
 
--- Show all notifier history + messages (errors/warnings)
-map("n", "<leader>sn", function() require("snacks.notifier").show_history() end, { desc = "Notifier history", silent = true })
+-- Notifications / messages
+map("n", "<leader>sn", function()
+  require("snacks.notifier").show_history()
+end, { desc = "Notifier history", silent = true })
 map("n", "<leader>sm", function()
   local msgs = vim.api.nvim_exec2("messages", { output = true }).output
-  if msgs == "" then msgs = "(no messages)" end
+  if msgs == "" then
+    msgs = "(no messages)"
+  end
   vim.fn.setreg("+", msgs)
-  vim.notify("Copied " .. #msgs .. " chars to clipboard\n\n" .. msgs:sub(1, 500), vim.log.levels.INFO, { title = "Messages" })
+  vim.notify("Copied messages to clipboard", vim.log.levels.INFO)
 end, { desc = "Copy :messages to clipboard", silent = true })
 
-map("n", "<C-k>", vim.lsp.buf.signature_help, { desc = "Signature help" })
-map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
-map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
-map("n", "<leader>cf", function() require("conform").format({ async = true, lsp_fallback = true }) end, { desc = "Format file" })
-map("v", "<leader>cf", function() require("conform").format({ async = true, lsp_fallback = true }) end, { desc = "Format selection" })
+-- Format via conform (LSP maps live on LspAttach)
+map("n", "<leader>cf", function()
+  require("conform").format({ async = true, lsp_fallback = true })
+end, { desc = "Format file" })
+map("v", "<leader>cf", function()
+  require("conform").format({ async = true, lsp_fallback = true })
+end, { desc = "Format selection" })
+
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Show diagnostic" })
-map("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous diagnostic" })
-map("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
-map("n", "<leader>xq", vim.diagnostic.setloclist, { desc = "Diagnostic quickfix" })
+map("n", "[d", function()
+  vim.diagnostic.jump({ count = -1, float = true })
+end, { desc = "Previous diagnostic" })
+map("n", "]d", function()
+  vim.diagnostic.jump({ count = 1, float = true })
+end, { desc = "Next diagnostic" })
+map("n", "<leader>xq", vim.diagnostic.setloclist, { desc = "Diagnostic loclist" })
 
--- LazyVim-style LSP keymaps (leader + c)
--- Code Action (normal + visual)
-map({ "n", "x" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
+-- Tabs
+map("n", "<leader><tab>n", "<cmd>tabnew<CR>", { desc = "New tab", silent = true })
+map("n", "<leader><tab>c", "<cmd>tabclose<CR>", { desc = "Close tab", silent = true })
+map("n", "<leader><tab>o", "<cmd>tabonly<CR>", { desc = "Only current tab", silent = true })
+map("n", "<leader><tab>m", "<cmd>tabmove<CR>", { desc = "Move tab", silent = true })
 
--- Codelens
-map("n", "<leader>cc", function()
-  vim.lsp.codelens.refresh({ bufnr = 0 })
-  vim.lsp.codelens.run({ bufnr = 0 })
-end, { desc = "Run Codelens" })
-map({ "n", "x" }, "<leader>cc", function() vim.lsp.codelens.run({ bufnr = 0 }) end, { desc = "Run Codelens" })
-map("n", "<leader>cC", function()
-  vim.lsp.codelens.refresh({ bufnr = 0 })
-  vim.lsp.codelens.display({ bufnr = 0 })
-end, { desc = "Refresh & Display Codelens" })
-
--- Rename
-map("n", "<leader>cR", function()
-  -- Rename file using LSP workspace symbols (works with tsserver/volar)
-  vim.lsp.buf.rename(nil, { rename_file = true })
-end, { desc = "Rename File" })
-map("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Rename" })
-
--- Source Action
-map("n", "<leader>cA", function()
-  vim.lsp.buf.code_action({
-    filter = function(a) return a.isSourceAction end,
-    apply = true,
-  })
-end, { desc = "Source Action" })
-
--- Organize Imports (LSP-based, works for TS/JS/Go/Java)
-map("n", "<leader>co", function()
-  local clients = vim.lsp.get_clients({ bufnr = 0 })
-  for _, client in ipairs(clients) do
-    -- Try common organize imports command IDs
-    local cmds = {
-      "typescript.organizeImports",
-      "typescript.goToProjectSourceAction",
-      "_typescript.organizeImports",
-      "rust-analyzer.runSingle",
-    }
-    for _, cmd in ipairs(cmds) do
-      if client.supports_method("workspace/executeCommand") then
-        local ok, _ = pcall(vim.lsp.buf.execute_command, { command = cmd, arguments = { vim.uri_from_bufnr(0) } })
-        if ok then return end
-      end
-    end
-  end
-  -- Fallback: trigger code action with source action filter
-  vim.lsp.buf.code_action({
-    filter = function(a)
-      return a.kind and (a.kind:match("source") or a.kind:match("organize") or a.kind:match("import")) ~= nil
-    end,
-    apply = true,
-  })
-end, { desc = "Organize Imports" })
-
--- LSP Symbols (telescope)
-map("n", "<leader>ss", function()
-  require("telescope.builtin").lsp_document_symbols({ symbol_width = 60 })
-end, { desc = "LSP Symbols" })
-map("n", "<leader>sS", function()
-  require("telescope.builtin").lsp_workspace_symbols({ symbol_width = 60 })
-end, { desc = "LSP Workspace Symbols" })
-
--- TypeScript/JavaScript specific
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact", "vue" },
-  callback = function()
-    map("n", "<leader>ti", ":TSToolsAddMissingImports<CR>", { buffer = true, desc = "Add missing imports" })
-    map("n", "<leader>to", ":TSToolsOrganizeImports<CR>", { buffer = true, desc = "Organize imports" })
-    map("n", "<leader>tu", ":TSToolsRemoveUnused<CR>", { buffer = true, desc = "Remove unused imports" })
-    map("n", "<leader>tf", ":TSToolsFixAll<CR>", { buffer = true, desc = "Fix all" })
-    map("n", "<leader>tr", ":TSToolsRenameFile<CR>", { buffer = true, desc = "Rename file" })
-    map("n", "<leader>ts", ":TSToolsSortImports<CR>", { buffer = true, desc = "Sort imports" })
-    map("n", "<leader>tR", ":TSToolsRemoveUnusedImports<CR>", { buffer = true, desc = "Remove unused imports" })
-  end,
-})
-
--- Go specific
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "go",
-  callback = function()
-    map("n", "<leader>gt", ":GoTest<CR>", { buffer = true, desc = "Go test" })
-    map("n", "<leader>gr", ":GoRun<CR>", { buffer = true, desc = "Go run" })
-    map("n", "<leader>gf", ":GoFillStruct<CR>", { buffer = true, desc = "Go fill struct" })
-    map("n", "<leader>ga", ":GoAddTags<CR>", { buffer = true, desc = "Go add tags" })
-    map("n", "<leader>gA", ":GoAddTags json<CR>", { buffer = true, desc = "Go add json tags" })
-    map("n", "<leader>gm", ":GoModTidy<CR>", { buffer = true, desc = "Go mod tidy" })
-    map("n", "<leader>gi", ":GoIfErr<CR>", { buffer = true, desc = "Go if err != nil" })
-  end,
-})
-
--- Java specific
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "java",
-  callback = function()
-    map("n", "<leader>ji", function() require("jdtls").organize_imports() end, { buffer = true, desc = "Java organize imports" })
-    map("n", "<leader>jv", function() require("jdtls").extract_variable() end, { buffer = true, desc = "Java extract variable" })
-    map("v", "<leader>jv", function() require("jdtls").extract_variable(true) end, { buffer = true, desc = "Java extract variable" })
-    map("n", "<leader>jc", function() require("jdtls").extract_constant() end, { buffer = true, desc = "Java extract constant" })
-    map("v", "<leader>jc", function() require("jdtls").extract_constant(true) end, { buffer = true, desc = "Java extract constant" })
-    map("n", "<leader>jm", function() require("jdtls").extract_method() end, { buffer = true, desc = "Java extract method" })
-    map("v", "<leader>jm", function() require("jdtls").extract_method(true) end, { buffer = true, desc = "Java extract method" })
-    map("n", "<leader>jt", function() require("jdtls").test_class() end, { buffer = true, desc = "Java test class" })
-    map("n", "<leader>jn", function() require("jdtls").test_nearest_method() end, { buffer = true, desc = "Java test nearest" })
-    map("n", "<leader>je", function() require("jdtls").super_implementation() end, { buffer = true, desc = "Java super implementation" })
-  end,
-})
-
--- Vue/Nuxt specific
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "vue",
-  callback = function()
-    map("n", "<leader>vc", ":VueOpenComponent<CR>", { buffer = true, desc = "Vue open component under cursor" })
-    map("n", "<leader>vs", ":VueSwitchScript<CR>", { buffer = true, desc = "Vue switch script lang" })
-    map("n", "<leader>vt", ":VueSwitchTemplate<CR>", { buffer = true, desc = "Vue switch template" })
-    map("n", "<leader>va", ":VueAddComponent<CR>", { buffer = true, desc = "Vue add component" })
-    map("n", "<leader>vl", ":VueLogProps<CR>", { buffer = true, desc = "Vue log props" })
-    map("n", "<leader>vd", ":VueDefineProps<CR>", { buffer = true, desc = "Vue define props" })
-  end,
-})
-
--- Quickfix navigation
-map("n", "[q", ":cprev<CR>", { desc = "Previous quickfix item", silent = true })
-map("n", "]q", ":cnext<CR>", { desc = "Next quickfix item", silent = true })
-map("n", "[Q", ":cfirst<CR>", { desc = "First quickfix item", silent = true })
-map("n", "]Q", ":clast<CR>", { desc = "Last quickfix item", silent = true })
-
--- Location list navigation
-map("n", "[l", ":lprev<CR>", { desc = "Previous location list item", silent = true })
-map("n", "]l", ":lnext<CR>", { desc = "Next location list item", silent = true })
-map("n", "[L", ":lfirst<CR>", { desc = "First location list item", silent = true })
-map("n", "]L", ":llast<CR>", { desc = "Last location list item", silent = true })
-
--- Tab management
-map("n", "<leader>tn", ":tabnew<CR>", { desc = "New tab", silent = true })
-map("n", "<leader>tc", ":tabclose<CR>", { desc = "Close tab", silent = true })
-map("n", "<leader>to", ":tabonly<CR>", { desc = "Only current tab", silent = true })
-map("n", "<leader>tm", ":tabmove<CR>", { desc = "Move tab", silent = true })
-
--- Toggle settings
-map("n", "<leader>tw", function()
+-- UI toggles
+map("n", "<leader>uw", function()
   vim.wo.wrap = not vim.wo.wrap
-  vim.notify("Wrap " .. (vim.wo.wrap and "enabled" or "disabled"), vim.log.levels.INFO)
+  vim.notify("Wrap " .. (vim.wo.wrap and "enabled" or "disabled"))
 end, { desc = "Toggle wrap" })
-
-map("n", "<leader>ts", function()
+map("n", "<leader>us", function()
   vim.wo.spell = not vim.wo.spell
-  vim.notify("Spell " .. (vim.wo.spell and "enabled" or "disabled"), vim.log.levels.INFO)
+  vim.notify("Spell " .. (vim.wo.spell and "enabled" or "disabled"))
 end, { desc = "Toggle spell" })
-
-map("n", "<leader>tn", function()
+map("n", "<leader>ul", function()
   vim.wo.number = not vim.wo.number
   vim.wo.relativenumber = vim.wo.number
 end, { desc = "Toggle line numbers" })
 
+-- Quickfix / location list
+map("n", "[q", "<cmd>cprev<CR>", { desc = "Previous quickfix item", silent = true })
+map("n", "]q", "<cmd>cnext<CR>", { desc = "Next quickfix item", silent = true })
+map("n", "[Q", "<cmd>cfirst<CR>", { desc = "First quickfix item", silent = true })
+map("n", "]Q", "<cmd>clast<CR>", { desc = "Last quickfix item", silent = true })
+map("n", "[l", "<cmd>lprev<CR>", { desc = "Previous location list item", silent = true })
+map("n", "]l", "<cmd>lnext<CR>", { desc = "Next location list item", silent = true })
+
 -- Better search
-map("n", "*", "*N", { desc = "Search word under cursor (stay at position)" })
-map("n", "#", "#N", { desc = "Search word under cursor backwards (stay at position)" })
+map("n", "*", "*N", { desc = "Search word under cursor (stay)" })
+map("n", "#", "#N", { desc = "Search word under cursor backwards (stay)" })
 
 -- Stay in visual mode after indenting
-map("v", "<", "<gv", { desc = "Indent left and stay in visual mode" })
-map("v", ">", ">gv", { desc = "Indent right and stay in visual mode" })
+map("v", "<", "<gv", { desc = "Indent left" })
+map("v", ">", ">gv", { desc = "Indent right" })
 
--- Move cursor to beginning/end of line in insert mode
+-- Beginning/end of line in insert mode
 map("i", "<C-a>", "<C-o>^", { desc = "Beginning of line" })
 map("i", "<C-e>", "<C-o>$", { desc = "End of line" })
 
 -- Terminal mode escape
 map("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 map("t", "<C-[>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
+-- Language-specific maps (buffer-local)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact", "vue" },
+  callback = function()
+    map("n", "<leader>cM", function()
+      vim.lsp.buf.code_action({
+        context = { only = { "source.addMissingImports.ts" } },
+        apply = true,
+      })
+    end, { buffer = true, desc = "Add missing imports" })
+    map("n", "<leader>cu", function()
+      vim.lsp.buf.code_action({
+        context = { only = { "source.removeUnused.ts" } },
+        apply = true,
+      })
+    end, { buffer = true, desc = "Remove unused imports" })
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "go",
+  callback = function()
+    map("n", "<leader>gt", "<cmd>GoTest<CR>", { buffer = true, desc = "Go test" })
+    map("n", "<leader>gr", "<cmd>GoRun<CR>", { buffer = true, desc = "Go run" })
+    map("n", "<leader>gF", "<cmd>GoFillStruct<CR>", { buffer = true, desc = "Go fill struct" })
+    map("n", "<leader>ga", "<cmd>GoAddTags<CR>", { buffer = true, desc = "Go add tags" })
+    map("n", "<leader>gA", "<cmd>GoAddTags json<CR>", { buffer = true, desc = "Go add json tags" })
+    map("n", "<leader>gm", "<cmd>GoModTidy<CR>", { buffer = true, desc = "Go mod tidy" })
+    map("n", "<leader>gi", "<cmd>GoIfErr<CR>", { buffer = true, desc = "Go if err != nil" })
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "java",
+  callback = function()
+    map("n", "<leader>ji", function()
+      require("jdtls").organize_imports()
+    end, { buffer = true, desc = "Java organize imports" })
+    map("n", "<leader>jv", function()
+      require("jdtls").extract_variable()
+    end, { buffer = true, desc = "Java extract variable" })
+    map("v", "<leader>jv", function()
+      require("jdtls").extract_variable(true)
+    end, { buffer = true, desc = "Java extract variable" })
+    map("n", "<leader>jc", function()
+      require("jdtls").extract_constant()
+    end, { buffer = true, desc = "Java extract constant" })
+    map("v", "<leader>jc", function()
+      require("jdtls").extract_constant(true)
+    end, { buffer = true, desc = "Java extract constant" })
+    map("n", "<leader>jm", function()
+      require("jdtls").extract_method()
+    end, { buffer = true, desc = "Java extract method" })
+    map("v", "<leader>jm", function()
+      require("jdtls").extract_method(true)
+    end, { buffer = true, desc = "Java extract method" })
+    map("n", "<leader>jt", function()
+      require("jdtls").test_class()
+    end, { buffer = true, desc = "Java test class" })
+    map("n", "<leader>jn", function()
+      require("jdtls").test_nearest_method()
+    end, { buffer = true, desc = "Java test nearest" })
+    map("n", "<leader>je", function()
+      require("jdtls").super_implementation()
+    end, { buffer = true, desc = "Java super implementation" })
+  end,
+})

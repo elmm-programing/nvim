@@ -324,9 +324,6 @@ return {
     cmd = "ToggleTerm",
     keys = {
       { "<leader>\\", "<cmd>ToggleTerm direction=float<cr>", desc = "Toggle floating terminal" },
-      { "<leader>th", "<cmd>ToggleTerm direction=horizontal<cr>", desc = "Toggle horizontal terminal" },
-      { "<leader>tv", "<cmd>ToggleTerm direction=vertical<cr>", desc = "Toggle vertical terminal" },
-      { "<leader>tf", "<cmd>ToggleTerm direction=float<cr>", desc = "Toggle floating terminal" },
     },
     opts = {
       size = function(term)
@@ -457,35 +454,6 @@ return {
         bo = {
           filetype = { "neo-tree", "neo-tree-popup", "notify", "quickfix" },
           buftype = { "terminal", "quickfix", "nofile" },
-        },
-      },
-    },
-  },
-
-  -- Better indentation guide (already have indent-blankline but this is more modern)
-  {
-    "lukas-reineke/indent-blankline.nvim",
-    main = "ibl",
-    event = "VeryLazy",
-    opts = {
-      indent = {
-        char = "│",
-        tab_char = "│",
-      },
-      scope = { enabled = true },
-      exclude = {
-        filetypes = {
-          "help",
-          "alpha",
-          "dashboard",
-          "neo-tree",
-          "Trouble",
-          "trouble",
-          "lazy",
-          "mason",
-          "notify",
-          "toggleterm",
-          "lazyterm",
         },
       },
     },
