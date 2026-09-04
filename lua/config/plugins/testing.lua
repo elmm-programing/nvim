@@ -9,6 +9,7 @@ return {
       "nvim-neotest/neotest-jest",
       "marilari88/neotest-vitest",
       "rcasia/neotest-java",
+      "rouge8/neotest-rust",
     },
     opts = function()
       return {
@@ -32,6 +33,9 @@ return {
           }),
           require("neotest-java")({
             ignore_wrapper = false,
+          }),
+          require("neotest-rust")({
+            args = { "--no-capture" },
           }),
         },
         status = { virtual_text = true },
@@ -62,7 +66,7 @@ return {
   {
     "andythigpen/nvim-coverage",
     dependencies = { "nvim-lua/plenary.nvim" },
-    ft = { "go", "typescript", "javascript", "java" },
+    ft = { "go", "typescript", "javascript", "java", "rust" },
     opts = {
       commands = true,
       highlights = {

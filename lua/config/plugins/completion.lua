@@ -24,6 +24,7 @@ return {
         end,
       },
       "folke/lazydev.nvim",
+      "brenoprata10/nvim-highlight-colors",
     },
     opts = {
       keymap = {
@@ -49,7 +50,38 @@ return {
           window = { border = "rounded" },
         },
         ghost_text = { enabled = true },
-        menu = { border = "rounded", draw = { padding = 1 } },
+        menu = {
+          border = "rounded",
+          draw = {
+            padding = 1,
+            components = {
+              kind_icon = {
+                text = function(ctx)
+                  local icon = ctx.kind_icon
+                  local ok, hl_colors = pcall(require, "nvim-highlight-colors")
+                  if ok and ctx.kind == "Color" then
+                    local color_item = hl_colors.format(ctx.item.documentation, { kind = ctx.kind })
+                    if color_item and color_item.abbr ~= "" then
+                      icon = color_item.abbr
+                    end
+                  end
+                  return icon .. ctx.icon_gap
+                end,
+                highlight = function(ctx)
+                  local highlight = "BlinkCmpKind" .. ctx.kind
+                  local ok, hl_colors = pcall(require, "nvim-highlight-colors")
+                  if ok and ctx.kind == "Color" then
+                    local color_item = hl_colors.format(ctx.item.documentation, { kind = ctx.kind })
+                    if color_item and color_item.abbr_hl_group then
+                      highlight = color_item.abbr_hl_group
+                    end
+                  end
+                  return highlight
+                end,
+              },
+            },
+          },
+        },
       },
       signature = { enabled = true, window = { border = "rounded" } },
       sources = {

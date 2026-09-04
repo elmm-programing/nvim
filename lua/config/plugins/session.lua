@@ -19,7 +19,7 @@ return {
     "ahmedkhalf/project.nvim",
     event = "VeryLazy",
     opts = {
-      manual_mode = false,
+      manual_mode = true,
       detection_methods = { "pattern", "lsp" },
       patterns = {
         ".git",
@@ -41,6 +41,7 @@ return {
     end,
     keys = {
       { "<leader>fp", "<cmd>Telescope projects<cr>", desc = "Find projects" },
+      { "<leader>fP", "<cmd>ProjectRoot<cr>", desc = "Set cwd to project root" },
     },
   },
 

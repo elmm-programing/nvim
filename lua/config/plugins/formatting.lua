@@ -30,6 +30,7 @@ return {
         go = { "gofumpt", "goimports" },
         java = { "google-java-format" },
         lua = { "stylua" },
+        rust = { "rustfmt" },
       },
       format_on_save = {
         timeout_ms = 2000,

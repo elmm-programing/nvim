@@ -179,6 +179,7 @@ return {
           "dockerfile",
           "gitignore",
           "http",
+          "rust",
         },
         auto_install = true,
         highlight = { enable = true },
@@ -210,19 +211,19 @@ return {
             set_jumps = true,
             goto_next_start = {
               ["]m"] = "@function.outer",
-              ["]]"] = "@class.outer",
+              ["]c"] = "@class.outer",
             },
             goto_next_end = {
               ["]M"] = "@function.outer",
-              ["]["] = "@class.outer",
+              ["]C"] = "@class.outer",
             },
             goto_previous_start = {
               ["[m"] = "@function.outer",
-              ["[["] = "@class.outer",
+              ["[c"] = "@class.outer",
             },
             goto_previous_end = {
               ["[M"] = "@function.outer",
-              ["[]"] = "@class.outer",
+              ["[C"] = "@class.outer",
             },
           },
           swap = {
@@ -278,6 +279,7 @@ return {
         { "<leader>u", group = "ui" },
         { "<leader>q", group = "quit/session" },
         { "<leader>j", group = "java" },
+        { "<leader>R", group = "rust" },
         { "<leader><tab>", group = "tabs" },
       },
     },
@@ -372,6 +374,19 @@ return {
     event = "VeryLazy",
   },
 
+  -- Hex / CSS / Tailwind class colors (works with blink.cmp, not nvim-cmp)
+  {
+    "brenoprata10/nvim-highlight-colors",
+    event = { "BufReadPre", "BufNewFile" },
+    opts = {
+      render = "background",
+      enable_hex = true,
+      enable_rgb = true,
+      enable_hsl = true,
+      enable_tailwind = true,
+    },
+  },
+
   {
     "folke/snacks.nvim",
     priority = 1000,
@@ -380,6 +395,7 @@ return {
       notifier = { enabled = true },
       dashboard = { enabled = true },
       statuscolumn = { enabled = true },
+      -- Image preview in hover/docs crashes Treesitter on this stack; keep off.
       image = { enabled = false },
     },
   },

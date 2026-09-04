@@ -135,6 +135,8 @@ return {
         "google-java-format",
         "vue-language-server",
         "eslint_d",
+        "rust-analyzer",
+        "codelldb",
       },
     },
   },

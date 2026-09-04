@@ -142,7 +142,6 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "go",
   callback = function()
-    map("n", "<leader>Gt", "<cmd>GoTest<CR>", { buffer = true, desc = "Go test" })
     map("n", "<leader>Gr", "<cmd>GoRun<CR>", { buffer = true, desc = "Go run" })
     map("n", "<leader>Gf", "<cmd>GoFillStruct<CR>", { buffer = true, desc = "Go fill struct" })
     map("n", "<leader>Ga", "<cmd>GoAddTags<CR>", { buffer = true, desc = "Go add tags" })
@@ -185,5 +184,23 @@ vim.api.nvim_create_autocmd("FileType", {
     map("n", "<leader>je", function()
       require("jdtls").super_implementation()
     end, { buffer = true, desc = "Java super implementation" })
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "rust",
+  callback = function()
+    map("n", "<leader>Rr", function()
+      vim.cmd.RustLsp("runnables")
+    end, { buffer = true, desc = "Rust runnables" })
+    map("n", "<leader>Rd", function()
+      vim.cmd.RustLsp("debuggables")
+    end, { buffer = true, desc = "Rust debuggables" })
+    map("n", "<leader>Re", function()
+      vim.cmd.RustLsp("expandMacro")
+    end, { buffer = true, desc = "Rust expand macro" })
+    map("n", "<leader>Rc", function()
+      vim.cmd.RustLsp("flyCheck")
+    end, { buffer = true, desc = "Rust fly check" })
   end,
 })
