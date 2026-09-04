@@ -204,21 +204,7 @@ return {
     },
   },
 
-  -- vim.ui.input (rename, etc). vim.ui.select is handled by telescope-ui-select
-  {
-    "stevearc/dressing.nvim",
-    lazy = true,
-    init = function()
-      vim.ui.input = function(...)
-        require("lazy").load({ plugins = { "dressing.nvim" } })
-        return vim.ui.input(...)
-      end
-    end,
-    opts = {
-      input = { enabled = true },
-      select = { enabled = false },
-    },
-  },
+  -- vim.ui.input is snacks.input; vim.ui.select is telescope-ui-select
 
   -- Search and replace (spectre)
   {

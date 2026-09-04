@@ -55,5 +55,6 @@ Tailwind / hex / rgb colors highlight in buffer via `nvim-highlight-colors` (bli
 
 - **No Copilot / Gemini / Avante / Ollama.**
 - **Snacks `image` is off.** Hover image preview crashes Treesitter on this stack.
+- Files over 1MB use Snacks `bigfile` (Treesitter/LSP/format skipped).
 - Prettier follows the project's `.prettierrc` (no hardcoded `--no-semi`).
 - `jdtls` is started only by nvim-jdtls; `rust-analyzer` only by rustaceanvim.

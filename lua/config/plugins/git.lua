@@ -50,8 +50,8 @@ return {
       "nvim-telescope/telescope.nvim",
     },
     keys = {
-      { "<leader>gg", ":Neogit<CR>", desc = "Open Neogit" },
-      { "<leader>gc", ":Neogit commit<CR>", desc = "Neogit commit" },
+      { "<leader>gg", "<cmd>Neogit<CR>", desc = "Open Neogit" },
+      { "<leader>gc", "<cmd>Neogit commit<CR>", desc = "Neogit commit" },
     },
     opts = {
       integrations = { diffview = true, telescope = true },

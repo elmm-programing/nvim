@@ -14,7 +14,8 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("config.plugins", {
   defaults = { lazy = true },
   install = { colorscheme = { "tokyonight" } },
-  checker = { enabled = true, notify = false },
+  checker = { enabled = true, notify = false, frequency = 86400 },
+  change_detection = { notify = false },
   lockfile = vim.fn.stdpath("config") .. "/lazy-lock.json",
   performance = {
     rtp = {

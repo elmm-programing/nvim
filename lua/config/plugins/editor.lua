@@ -9,8 +9,8 @@ return {
     },
     cmd = "Neotree",
     keys = {
-      { "<leader>e", ":Neotree toggle<CR>", desc = "Toggle Neo-tree", silent = true },
-      { "<leader>E", ":Neotree reveal<CR>", desc = "Reveal current file", silent = true },
+      { "<leader>e", "<cmd>Neotree toggle<CR>", desc = "Toggle Neo-tree", silent = true },
+      { "<leader>E", "<cmd>Neotree reveal<CR>", desc = "Reveal current file", silent = true },
     },
     opts = {
       close_if_last_window = true,
@@ -64,19 +64,19 @@ return {
     },
     cmd = "Telescope",
     keys = {
-      { "<leader>ff", ":Telescope find_files<CR>", desc = "Find files", silent = true },
-      { "<leader>fg", ":Telescope live_grep<CR>", desc = "Live grep", silent = true },
-      { "<leader>fb", ":Telescope buffers<CR>", desc = "Buffers", silent = true },
-      { "<leader>fh", ":Telescope help_tags<CR>", desc = "Help tags", silent = true },
-      { "<leader>fo", ":Telescope oldfiles<CR>", desc = "Recent files", silent = true },
-      { "<leader>fc", ":Telescope commands<CR>", desc = "Commands", silent = true },
-      { "<leader>fk", ":Telescope keymaps<CR>", desc = "Keymaps", silent = true },
-      { "<leader>fd", ":Telescope diagnostics<CR>", desc = "Diagnostics", silent = true },
-      { "<leader>fr", ":Telescope resume<CR>", desc = "Resume picker", silent = true },
-      { "<leader>ft", ":TodoTelescope<CR>", desc = "Todo comments", silent = true },
-      { "<leader>gf", ":Telescope git_files<CR>", desc = "Git files", silent = true },
-      { "<leader>gb", ":Telescope git_branches<CR>", desc = "Git branches", silent = true },
-      { "<leader>gL", ":Telescope git_commits<CR>", desc = "Git log", silent = true },
+      { "<leader>ff", "<cmd>Telescope find_files<CR>", desc = "Find files", silent = true },
+      { "<leader>fg", "<cmd>Telescope live_grep<CR>", desc = "Live grep", silent = true },
+      { "<leader>fb", "<cmd>Telescope buffers<CR>", desc = "Buffers", silent = true },
+      { "<leader>fh", "<cmd>Telescope help_tags<CR>", desc = "Help tags", silent = true },
+      { "<leader>fo", "<cmd>Telescope oldfiles<CR>", desc = "Recent files", silent = true },
+      { "<leader>fc", "<cmd>Telescope commands<CR>", desc = "Commands", silent = true },
+      { "<leader>fk", "<cmd>Telescope keymaps<CR>", desc = "Keymaps", silent = true },
+      { "<leader>fd", "<cmd>Telescope diagnostics<CR>", desc = "Diagnostics", silent = true },
+      { "<leader>fr", "<cmd>Telescope resume<CR>", desc = "Resume picker", silent = true },
+      { "<leader>ft", "<cmd>TodoTelescope<CR>", desc = "Todo comments", silent = true },
+      { "<leader>gf", "<cmd>Telescope git_files<CR>", desc = "Git files", silent = true },
+      { "<leader>gb", "<cmd>Telescope git_branches<CR>", desc = "Git branches", silent = true },
+      { "<leader>gL", "<cmd>Telescope git_commits<CR>", desc = "Git log", silent = true },
     },
     config = function()
       local telescope = require("telescope")
@@ -144,7 +144,7 @@ return {
     build = ":TSUpdate",
     event = { "BufReadPre", "BufNewFile" },
     dependencies = {
-      "nvim-treesitter/nvim-treesitter-textobjects",
+      { "nvim-treesitter/nvim-treesitter-textobjects", branch = "master" },
       "windwp/nvim-ts-autotag",
     },
     config = function()
@@ -182,8 +182,13 @@ return {
           "rust",
         },
         auto_install = true,
-        highlight = { enable = true },
-        indent = { enable = true },
+        highlight = {
+          enable = true,
+          disable = function(_, buf)
+            return vim.b[buf].large_file == true or vim.bo[buf].filetype == "bigfile"
+          end,
+        },
+        indent = { enable = true, disable = { "yaml", "yml" } },
         incremental_selection = {
           enable = true,
           keymaps = {
@@ -247,7 +252,7 @@ return {
     "stevearc/oil.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     keys = {
-      { "-", ":Oil<CR>", desc = "Open parent directory" },
+      { "-", "<cmd>Oil<CR>", desc = "Open parent directory" },
     },
     opts = {
       default_file_explorer = false,
@@ -395,6 +400,9 @@ return {
       notifier = { enabled = true },
       dashboard = { enabled = true },
       statuscolumn = { enabled = true },
+      input = { enabled = true },
+      bigfile = { enabled = true, size = 1024 * 1024 },
+      quickfile = { enabled = true },
       -- Image preview in hover/docs crashes Treesitter on this stack; keep off.
       image = { enabled = false },
     },

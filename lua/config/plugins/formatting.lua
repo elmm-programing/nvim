@@ -27,21 +27,23 @@ return {
         jsonc = { "prettier" },
         yaml = { "prettier" },
         markdown = { "prettier" },
-        go = { "gofumpt", "goimports" },
+        go = { "goimports", "gofumpt" },
         java = { "google-java-format" },
         lua = { "stylua" },
         rust = { "rustfmt" },
       },
-      format_on_save = {
-        timeout_ms = 2000,
-        lsp_format = "fallback",
-      },
+      format_on_save = function(bufnr)
+        if vim.b[bufnr].large_file or vim.bo[bufnr].filetype == "bigfile" then
+          return
+        end
+        return { timeout_ms = 2000, lsp_format = "fallback" }
+      end,
     },
   },
 
   {
     "mfussenegger/nvim-lint",
-    event = { "BufReadPost", "BufWritePost", "InsertLeave" },
+    event = { "BufReadPost", "BufWritePost" },
     config = function()
       local lint = require("lint")
       lint.linters_by_ft = {
@@ -65,9 +67,12 @@ return {
         ".eslintrc.yaml",
       }
 
-      vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave" }, {
+      vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost" }, {
         group = vim.api.nvim_create_augroup("NvimLint", { clear = true }),
         callback = function(args)
+          if vim.b[args.buf].large_file or vim.bo[args.buf].filetype == "bigfile" then
+            return
+          end
           local ft = vim.bo[args.buf].filetype
           if not lint.linters_by_ft[ft] then
             return

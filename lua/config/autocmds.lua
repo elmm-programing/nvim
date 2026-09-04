@@ -1,17 +1,15 @@
 local augroup = vim.api.nvim_create_augroup("ConfigAutocmds", { clear = true })
 
-vim.api.nvim_create_autocmd("TextYankPost", {
-  group = augroup,
-  callback = function()
-    vim.highlight.on_yank({ timeout = 200 })
-  end,
-  desc = "Highlight on yank",
-})
+-- Yank highlight is handled by yanky.nvim
 
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = augroup,
   callback = function(args)
-    if not vim.bo[args.buf].modifiable then
+    if not vim.bo[args.buf].modifiable or vim.b[args.buf].large_file or vim.bo[args.buf].filetype == "bigfile" then
+      return
+    end
+    local ft = vim.bo[args.buf].filetype
+    if ft == "markdown" or ft == "gitcommit" then
       return
     end
     local view = vim.fn.winsaveview()
@@ -76,7 +74,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   desc = "Create parent directories when saving",
 })
 
-vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
   group = augroup,
   callback = function()
     if vim.o.buftype == "" then
@@ -117,40 +115,4 @@ vim.api.nvim_create_autocmd("TermOpen", {
     vim.cmd("startinsert")
   end,
   desc = "Auto-insert in terminal",
-})
-
-vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
-  group = augroup,
-  callback = function()
-    if vim.g.nuxt_project then
-      return
-    end
-    local cwd = vim.fn.getcwd()
-    if vim.fn.filereadable(cwd .. "/nuxt.config.ts") == 1 or vim.fn.filereadable(cwd .. "/nuxt.config.js") == 1 then
-      vim.g.nuxt_project = true
-      vim.g.nuxt_path_aliases = {
-        ["~"] = cwd,
-        ["@"] = cwd,
-        ["~~"] = cwd,
-        ["@@"] = cwd,
-      }
-    end
-  end,
-  desc = "Detect Nuxt project settings",
-})
-
-vim.api.nvim_create_autocmd("BufReadPre", {
-  group = augroup,
-  callback = function(args)
-    local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(args.buf))
-    if ok and stats and stats.size > 1024 * 1024 then
-      vim.b[args.buf].large_file = true
-      vim.bo[args.buf].syntax = "off"
-      vim.bo[args.buf].swapfile = false
-      vim.bo[args.buf].undofile = false
-      vim.wo.foldmethod = "manual"
-      vim.notify("Large file detected — syntax highlighting disabled", vim.log.levels.WARN)
-    end
-  end,
-  desc = "Disable syntax for large files",
 })

@@ -24,7 +24,6 @@ return {
         end,
       },
       "folke/lazydev.nvim",
-      "brenoprata10/nvim-highlight-colors",
     },
     opts = {
       keymap = {

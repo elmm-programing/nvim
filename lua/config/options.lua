@@ -34,7 +34,10 @@ opt.swapfile = false
 opt.backup = false
 opt.undodir = vim.fn.stdpath("data") .. "/undodir"
 opt.undofile = true
-opt.clipboard = "unnamedplus"
+-- clipboard can block on WSL/SSH/macOS; attach after UI is up
+vim.schedule(function()
+  vim.opt.clipboard = "unnamedplus"
+end)
 
 -- Window management
 opt.splitright = true
