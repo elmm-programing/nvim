@@ -45,6 +45,29 @@ map("x", "<leader>p", '"_dP', { desc = "Paste without overwriting register" })
 -- Disable Q (ex mode)
 map("n", "Q", "<nop>")
 
+-- nvim-lspconfig 2.x dropped :LspInfo; keep the old names
+vim.api.nvim_create_user_command("LspInfo", function()
+  vim.cmd.checkhealth("vim.lsp")
+end, { desc = "Show LSP client status" })
+vim.api.nvim_create_user_command("LspLog", function()
+  vim.cmd.edit(vim.lsp.log.get_filename())
+end, { desc = "Open LSP log" })
+vim.api.nvim_create_user_command("LspRestart", function()
+  local buf = vim.api.nvim_get_current_buf()
+  local clients = vim.lsp.get_clients({ bufnr = buf })
+  if #clients == 0 then
+    vim.notify("No LSP clients on this buffer", vim.log.levels.WARN)
+    return
+  end
+  for _, client in ipairs(clients) do
+    vim.notify("Restarting " .. client.name, vim.log.levels.INFO)
+    vim.lsp.stop_client(client.id, true)
+  end
+  vim.defer_fn(function()
+    vim.cmd.edit()
+  end, 200)
+end, { desc = "Restart LSP clients on this buffer" })
+
 -- Quick escape from insert mode
 map("i", "kj", "<Esc>", { desc = "Exit insert mode", silent = true })
 
@@ -69,6 +92,7 @@ map("n", "<leader>sm", function()
 end, { desc = "Copy :messages to clipboard", silent = true })
 
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Show diagnostic" })
+map("n", "<leader>cI", "<cmd>LspInfo<CR>", { desc = "LSP Info", silent = true })
 map("n", "[d", function()
   vim.diagnostic.jump({ count = -1, float = true })
 end, { desc = "Previous diagnostic" })

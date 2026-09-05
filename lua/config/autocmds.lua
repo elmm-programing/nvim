@@ -116,3 +116,62 @@ vim.api.nvim_create_autocmd("TermOpen", {
   end,
   desc = "Auto-insert in terminal",
 })
+
+-- Neovim HEAD crashes Treesitter conceal_line in markdown injection floats (K hover).
+-- Hover docs are unnamed markdown buffers; stop TS before the first redraw.
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup,
+  pattern = { "markdown", "lsp_markdown" },
+  callback = function(ev)
+    local buf = ev.buf
+    if vim.api.nvim_buf_get_name(buf) ~= "" then
+      return
+    end
+    local function stop_ts()
+      if not vim.api.nvim_buf_is_valid(buf) then
+        return
+      end
+      pcall(vim.treesitter.stop, buf)
+      for _, win in ipairs(vim.fn.win_findbuf(buf)) do
+        pcall(vim.api.nvim_set_option_value, "conceallevel", 0, { win = win })
+        pcall(vim.api.nvim_set_option_value, "concealcursor", "", { win = win })
+      end
+    end
+    stop_ts()
+    vim.schedule(stop_ts)
+  end,
+  desc = "Disable Treesitter in LSP hover markdown floats",
+})
+
+local function wipe_orphan_unnamed(keep)
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if buf ~= keep
+      and vim.api.nvim_buf_is_valid(buf)
+      and vim.bo[buf].buflisted
+      and vim.api.nvim_buf_get_name(buf) == ""
+      and vim.bo[buf].buftype == ""
+      and not vim.bo[buf].modified
+    then
+      local ok, lines = pcall(vim.api.nvim_buf_get_lines, buf, 0, 2, false)
+      if ok and (#lines == 0 or (#lines == 1 and (lines[1] == "" or lines[1] == nil))) then
+        pcall(vim.api.nvim_buf_delete, buf, { force = true })
+      end
+    end
+  end
+end
+
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  group = augroup,
+  callback = function(args)
+    if vim.api.nvim_buf_get_name(args.buf) == "" then
+      return
+    end
+    vim.schedule(function()
+      if vim.api.nvim_buf_is_valid(args.buf) then
+        wipe_orphan_unnamed(args.buf)
+      end
+    end)
+  end,
+  desc = "Wipe leftover [No Name] buffers after opening a file",
+})
+

@@ -184,8 +184,15 @@ return {
         auto_install = true,
         highlight = {
           enable = true,
-          disable = function(_, buf)
-            return vim.b[buf].large_file == true or vim.bo[buf].filetype == "bigfile"
+          disable = function(lang, buf)
+            if vim.b[buf].large_file == true or vim.bo[buf].filetype == "bigfile" then
+              return true
+            end
+            -- Hover/docs floats: markdown injections crash Neovim HEAD conceal_line
+            if (lang == "markdown" or lang == "markdown_inline") and vim.api.nvim_buf_get_name(buf) == "" then
+              return true
+            end
+            return false
           end,
         },
         indent = { enable = true, disable = { "yaml", "yml" } },

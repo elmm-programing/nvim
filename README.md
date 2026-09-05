@@ -42,6 +42,7 @@ Tailwind / hex / rgb colors highlight in buffer via `nvim-highlight-colors` (bli
 | `<leader><leader>` / `<leader>/` | Files / grep |
 | `<leader>e` | Neo-tree |
 | `gd` `gr` `gi` `gy` `K` | LSP |
+| `<leader>cI` / `:LspInfo` | LSP client status |
 | `<leader>ca` `<leader>cr` `<leader>cf` | Code action / rename / format |
 | `]b` `[b` | Buffers |
 | `]c` `[c` | Next/prev class (Treesitter; `]]` is Vim sections) |

@@ -45,7 +45,8 @@ return {
         documentation = {
           auto_show = true,
           auto_show_delay_ms = 200,
-          treesitter_highlighting = true,
+          -- Treesitter in doc floats crashes Neovim HEAD (conceal_line / nil node)
+          treesitter_highlighting = false,
           window = { border = "rounded" },
         },
         ghost_text = { enabled = true },
