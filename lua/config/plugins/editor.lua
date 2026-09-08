@@ -49,7 +49,7 @@ return {
 
   {
     "nvim-telescope/telescope.nvim",
-    branch = "0.1.x",
+    version = "0.2.0",
     dependencies = {
       "nvim-lua/plenary.nvim",
       {
@@ -156,6 +156,9 @@ return {
           "gomod",
           "gosum",
           "gotmpl",
+          "gowork",
+          "sql",
+          "comment",
           "java",
           "javascript",
           "typescript",
@@ -199,10 +202,11 @@ return {
         incremental_selection = {
           enable = true,
           keymaps = {
+            -- Avoid gr* — Neovim 0.11+ uses that prefix for default LSP maps
             init_selection = "gnn",
-            node_incremental = "grn",
-            node_decremental = "grm",
-            scope_incremental = "grc",
+            node_incremental = "gni",
+            node_decremental = "gnd",
+            scope_incremental = "gns",
           },
         },
         textobjects = {
@@ -282,14 +286,13 @@ return {
         { "<leader>c", group = "code" },
         { "<leader>d", group = "delete" },
         { "<leader>D", group = "debug" },
-        { "<leader>w", group = "workspace/save" },
         { "<leader>t", group = "test" },
         { "<leader>x", group = "diagnostics" },
         { "<leader>h", group = "git hunk" },
         { "<leader>s", group = "search/symbols" },
+        { "<leader>S", group = "session" },
         { "<leader>r", group = "refactor/REST" },
         { "<leader>u", group = "ui" },
-        { "<leader>q", group = "quit/session" },
         { "<leader>j", group = "java" },
         { "<leader>R", group = "rust" },
         { "<leader><tab>", group = "tabs" },

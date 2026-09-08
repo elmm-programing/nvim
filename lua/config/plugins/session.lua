@@ -7,10 +7,10 @@ return {
       dir = vim.fn.stdpath("state") .. "/sessions/",
     },
     keys = {
-      { "<Leader>qs", function() require("persistence").load() end, desc = "Restore Session" },
-      { "<Leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
-      { "<Leader>qd", function() require("persistence").stop() end, desc = "Don't Save Current Session" },
-      { "<Leader>qS", function() require("persistence").save() end, desc = "Save Session" },
+      { "<Leader>Ss", function() require("persistence").load() end, desc = "Restore Session" },
+      { "<Leader>Sl", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
+      { "<Leader>Sd", function() require("persistence").stop() end, desc = "Don't Save Current Session" },
+      { "<Leader>SS", function() require("persistence").save() end, desc = "Save Session" },
     },
   },
 

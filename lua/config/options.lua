@@ -68,6 +68,15 @@ vim.g.loaded_perl_provider = 0
 vim.g.loaded_python3_provider = 0
 vim.g.loaded_ruby_provider = 0
 
+-- go.nvim health: GOBIN + PATH so GOPATH/bin tools are visible
+local gobin = vim.fn.expand("~/go/bin")
+if vim.fn.isdirectory(gobin) == 1 then
+  vim.env.GOBIN = gobin
+  if not vim.env.PATH:find(gobin, 1, true) then
+    vim.env.PATH = gobin .. ":" .. vim.env.PATH
+  end
+end
+
 -- Performance
 opt.synmaxcol = 240
 opt.redrawtime = 10000

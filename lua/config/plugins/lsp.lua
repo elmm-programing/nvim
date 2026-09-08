@@ -86,6 +86,13 @@ return {
         severity_sort = true,
       })
 
+      -- Neovim 0.11+ maps grn/gra/grr/gri/grt/grx, so `gr` is a prefix and waits
+      -- on timeoutlen / which-key instead of jumping to references.
+      for _, lhs in ipairs({ "grr", "grn", "gra", "gri", "grt", "grx" }) do
+        pcall(vim.keymap.del, "n", lhs)
+      end
+      pcall(vim.keymap.del, { "v", "x" }, "gra")
+
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("LspConfig", { clear = true }),
         callback = function(args)
@@ -102,21 +109,15 @@ return {
 
           if not vim.b[bufnr].lsp_keys then
             vim.b[bufnr].lsp_keys = true
-            vim.keymap.set("n", "gd", function()
-              require("telescope.builtin").lsp_definitions({ reuse_win = true })
-            end, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
-            vim.keymap.set("n", "gD", function()
-              require("telescope.builtin").lsp_declarations({ reuse_win = true })
-            end, vim.tbl_extend("force", opts, { desc = "Go to declaration" }))
+            -- Telescope 0.1.x LSP pickers crash on Neovim 0.11+:
+            -- make_position_params requires an encoding, jump_to_location was removed.
+            vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
+            vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", opts, { desc = "Go to declaration" }))
             vim.keymap.set("n", "gr", function()
-              require("telescope.builtin").lsp_references({ include_current_line = false })
-            end, vim.tbl_extend("force", opts, { desc = "Find references" }))
-            vim.keymap.set("n", "gi", function()
-              require("telescope.builtin").lsp_implementations({ reuse_win = true })
-            end, vim.tbl_extend("force", opts, { desc = "Go to implementation" }))
-            vim.keymap.set("n", "gy", function()
-              require("telescope.builtin").lsp_type_definitions({ reuse_win = true })
-            end, vim.tbl_extend("force", opts, { desc = "Go to type definition" }))
+              vim.lsp.buf.references({ includeDeclaration = true })
+            end, vim.tbl_extend("force", opts, { desc = "Find references", nowait = true }))
+            vim.keymap.set("n", "gi", vim.lsp.buf.implementation, vim.tbl_extend("force", opts, { desc = "Go to implementation" }))
+            vim.keymap.set("n", "gy", vim.lsp.buf.type_definition, vim.tbl_extend("force", opts, { desc = "Go to type definition" }))
             vim.keymap.set("n", "K", function()
               vim.lsp.buf.hover({ border = "rounded", silent = true })
             end, vim.tbl_extend("force", opts, { desc = "Hover" }))
@@ -141,17 +142,13 @@ return {
                 apply = true,
               })
             end, vim.tbl_extend("force", opts, { desc = "Organize Imports" }))
-            vim.keymap.set("n", "<leader>ss", function()
-              require("telescope.builtin").lsp_document_symbols({ symbol_width = 60 })
-            end, vim.tbl_extend("force", opts, { desc = "LSP Symbols" }))
-            vim.keymap.set("n", "<leader>sS", function()
-              require("telescope.builtin").lsp_workspace_symbols({ symbol_width = 60 })
-            end, vim.tbl_extend("force", opts, { desc = "LSP Workspace Symbols" }))
-            vim.keymap.set("n", "<leader>wd", function()
-              require("telescope.builtin").diagnostics({ bufnr = 0 })
+            vim.keymap.set("n", "<leader>ss", vim.lsp.buf.document_symbol, vim.tbl_extend("force", opts, { desc = "LSP Symbols" }))
+            vim.keymap.set("n", "<leader>sS", vim.lsp.buf.workspace_symbol, vim.tbl_extend("force", opts, { desc = "LSP Workspace Symbols" }))
+            vim.keymap.set("n", "<leader>xd", function()
+              vim.diagnostic.setloclist({ open = true })
             end, vim.tbl_extend("force", opts, { desc = "Buffer diagnostics" }))
-            vim.keymap.set("n", "<leader>wD", function()
-              require("telescope.builtin").diagnostics()
+            vim.keymap.set("n", "<leader>xD", function()
+              vim.diagnostic.setqflist({ open = true })
             end, vim.tbl_extend("force", opts, { desc = "All diagnostics" }))
             vim.keymap.set("n", "<leader>uh", function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
@@ -159,21 +156,15 @@ return {
           end
 
           if client and client.server_capabilities.codeLensProvider then
-            pcall(vim.lsp.codelens.refresh, { bufnr = bufnr })
+            pcall(vim.lsp.codelens.enable, true, { bufnr = bufnr })
             if not vim.b[bufnr].codelens_au then
               vim.b[bufnr].codelens_au = true
               vim.keymap.set("n", "<leader>cc", function()
                 vim.lsp.codelens.run()
               end, vim.tbl_extend("force", opts, { desc = "Run Codelens" }))
               vim.keymap.set("n", "<leader>cC", function()
-                vim.lsp.codelens.refresh({ bufnr = bufnr })
+                vim.lsp.codelens.enable(true, { bufnr = bufnr })
               end, vim.tbl_extend("force", opts, { desc = "Refresh Codelens" }))
-              vim.api.nvim_create_autocmd({ "InsertLeave", "BufWritePost" }, {
-                buffer = bufnr,
-                callback = function()
-                  pcall(vim.lsp.codelens.refresh, { bufnr = bufnr })
-                end,
-              })
             end
           end
 
@@ -193,6 +184,7 @@ return {
 
       vim.lsp.config("gopls", {
         capabilities = capabilities,
+        filetypes = { "go", "gomod", "gowork" },
         settings = {
           gopls = {
             analyses = {
@@ -278,19 +270,47 @@ return {
       }
       local ok_store, schemastore = pcall(require, "schemastore")
       if ok_store then
-        json_settings.json.schemas = schemastore.json.schemas()
-        yaml_settings.yaml.schemas = schemastore.yaml.schemas()
+        json_settings.json.schemas = schemastore.json.schemas({
+          select = {
+            "package.json",
+            "tsconfig.json",
+            ".eslintrc",
+            "prettierrc.json",
+            "jsconfig.json",
+          },
+        })
+        yaml_settings.yaml.schemas = schemastore.yaml.schemas({
+          select = {
+            "GitHub Workflow",
+            "GitHub Action",
+            "docker-compose.yml",
+          },
+        })
       end
       vim.lsp.config("jsonls", {
         capabilities = capabilities,
+        filetypes = { "json", "jsonc" },
         settings = json_settings,
       })
       vim.lsp.config("yamlls", {
         capabilities = capabilities,
+        filetypes = { "yaml", "yml" },
         settings = yaml_settings,
       })
 
-      vim.lsp.config("tailwindcss", { capabilities = capabilities })
+      vim.lsp.config("tailwindcss", {
+        capabilities = capabilities,
+        filetypes = {
+          "html",
+          "css",
+          "scss",
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact",
+          "vue",
+        },
+      })
       vim.lsp.config("html", {
         capabilities = capabilities,
         filetypes = { "html" },
