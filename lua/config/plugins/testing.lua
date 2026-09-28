@@ -90,9 +90,13 @@ return {
     },
   },
 
-  -- HTTP client (keys only in .http buffers so they do not clash with refactoring)
+  -- HTTP client (keys only in .http buffers so they do not clash with refactoring).
+  -- mistweaverco/kulala.nvim is private, so an unauthenticated clone asks for a
+  -- GitHub username and lazy fails with "terminal prompts disabled".
+  -- andycowan/kulala.nvim is the public recovery. It only publishes a macOS
+  -- kulala-core binary, so Linux/Windows downloads use LoNebula's rebuild.
   {
-    "mistweaverco/kulala.nvim",
+    "andycowan/kulala.nvim",
     ft = "http",
     keys = {
       { "<leader>rr", function() require("kulala").run() end, ft = "http", desc = "Run HTTP request" },
@@ -101,6 +105,9 @@ return {
       { "<leader>re", function() require("kulala").set_selected_env() end, ft = "http", desc = "Select HTTP env" },
     },
     opts = {
+      kulala_core = {
+        download_url = "https://github.com/LoNebula/kulala-core/releases/download/%s/%s",
+      },
       additional_curl_options = {},
       default_view = "body",
       split_direction = "vertical",
