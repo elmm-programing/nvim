@@ -43,7 +43,7 @@ return {
         "cssls",
         "emmet_ls",
       },
-      -- Enable servers from nvim-lspconfig after vim.lsp.config() runs
+      -- Servers are enabled in the nvim-lspconfig config below.
       automatic_enable = false,
     },
   },
@@ -59,6 +59,15 @@ return {
       "b0o/schemastore.nvim",
     },
     config = function()
+      -- vim.lsp.config exists on Neovim 0.11+. Older Neovim uses lspconfig's setup().
+      local function configure_server(name, opts)
+        if vim.lsp.config then
+          vim.lsp.config(name, opts)
+          return
+        end
+        require("lspconfig")[name].setup(opts)
+      end
+
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       local ok_blink, blink = pcall(require, "blink.cmp")
       if ok_blink then
@@ -191,7 +200,7 @@ return {
         end,
       })
 
-      vim.lsp.config("gopls", {
+      configure_server("gopls", {
         capabilities = capabilities,
         settings = {
           gopls = {
@@ -216,7 +225,7 @@ return {
         },
       })
 
-      vim.lsp.config("ts_ls", {
+      configure_server("ts_ls", {
         capabilities = capabilities,
         filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact" },
         settings = {
@@ -241,7 +250,7 @@ return {
       })
 
       -- Volar only on .vue; ts_ls handles standalone TS/JS
-      vim.lsp.config("volar", {
+      configure_server("volar", {
         capabilities = capabilities,
         filetypes = { "vue" },
         init_options = {
@@ -255,7 +264,7 @@ return {
         },
       })
 
-      vim.lsp.config("lua_ls", {
+      configure_server("lua_ls", {
         capabilities = capabilities,
         settings = {
           Lua = {
@@ -281,43 +290,46 @@ return {
         json_settings.json.schemas = schemastore.json.schemas()
         yaml_settings.yaml.schemas = schemastore.yaml.schemas()
       end
-      vim.lsp.config("jsonls", {
+      configure_server("jsonls", {
         capabilities = capabilities,
         settings = json_settings,
       })
-      vim.lsp.config("yamlls", {
+      configure_server("yamlls", {
         capabilities = capabilities,
         settings = yaml_settings,
       })
 
-      vim.lsp.config("tailwindcss", { capabilities = capabilities })
-      vim.lsp.config("html", {
+      configure_server("tailwindcss", { capabilities = capabilities })
+      configure_server("html", {
         capabilities = capabilities,
         filetypes = { "html" },
       })
-      vim.lsp.config("cssls", { capabilities = capabilities })
-      vim.lsp.config("emmet_ls", {
+      configure_server("cssls", { capabilities = capabilities })
+      configure_server("emmet_ls", {
         capabilities = capabilities,
         filetypes = { "html", "css", "scss", "javascriptreact", "typescriptreact", "vue" },
       })
-      vim.lsp.config("dockerls", { capabilities = capabilities })
-      vim.lsp.config("bashls", { capabilities = capabilities })
+      configure_server("dockerls", { capabilities = capabilities })
+      configure_server("bashls", { capabilities = capabilities })
 
-      -- jdtls is started only by nvim-jdtls
-      vim.lsp.enable({
-        "gopls",
-        "ts_ls",
-        "volar",
-        "lua_ls",
-        "jsonls",
-        "tailwindcss",
-        "html",
-        "cssls",
-        "emmet_ls",
-        "yamlls",
-        "dockerls",
-        "bashls",
-      })
+      -- jdtls is started only by nvim-jdtls.
+      -- setup() already starts servers on Neovim before 0.11.
+      if vim.lsp.enable then
+        vim.lsp.enable({
+          "gopls",
+          "ts_ls",
+          "volar",
+          "lua_ls",
+          "jsonls",
+          "tailwindcss",
+          "html",
+          "cssls",
+          "emmet_ls",
+          "yamlls",
+          "dockerls",
+          "bashls",
+        })
+      end
     end,
   },
 }
