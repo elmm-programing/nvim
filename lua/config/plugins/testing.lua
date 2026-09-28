@@ -89,34 +89,4 @@ return {
       { "<leader>tl", function() require("coverage").load(true) end, desc = "Load coverage (last)" },
     },
   },
-
-  -- HTTP client. kulala.nvim's GitHub repo is private, so lazy cannot clone it.
-  -- rest.nvim is public and sends requests with the system curl binary.
-  -- Keys stay on .http buffers so they do not clash with refactoring.
-  {
-    "rest-nvim/rest.nvim",
-    ft = { "http", "rest" },
-    keys = {
-      { "<leader>rr", "<cmd>Rest run<cr>", ft = "http", desc = "Run HTTP request" },
-      { "<leader>rl", "<cmd>Rest last<cr>", ft = "http", desc = "Replay last request" },
-      { "<leader>re", "<cmd>Rest env select<cr>", ft = "http", desc = "Select HTTP env" },
-      {
-        "<leader>rs",
-        function()
-          vim.cmd("enew")
-          vim.bo.buftype = "nofile"
-          vim.bo.bufhidden = "hide"
-          vim.bo.swapfile = false
-          vim.bo.filetype = "http"
-          vim.api.nvim_buf_set_lines(0, 0, -1, false, {
-            "### scratchpad",
-            "GET https://httpbin.org/get HTTP/1.1",
-            "accept: application/json",
-            "",
-          })
-        end,
-        desc = "HTTP scratchpad",
-      },
-    },
-  },
 }

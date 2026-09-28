@@ -287,7 +287,7 @@ return {
         { "<leader>x", group = "diagnostics" },
         { "<leader>h", group = "git hunk" },
         { "<leader>s", group = "search/symbols" },
-        { "<leader>r", group = "refactor/REST" },
+        { "<leader>r", group = "refactor" },
         { "<leader>u", group = "ui" },
         { "<leader>q", group = "quit/session" },
         { "<leader>j", group = "java" },
