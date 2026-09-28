@@ -1,6 +1,9 @@
 return {
   {
     "lewis6991/gitsigns.nvim",
+    -- Newer gitsigns calls vim.validate with a string, which errors on Neovim
+    -- before 0.11: "opt: expected table, got string".
+    version = "2.1.0",
     event = { "BufReadPre", "BufNewFile" },
     opts = {
       signs = {
