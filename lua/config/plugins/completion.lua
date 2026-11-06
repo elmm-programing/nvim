@@ -7,7 +7,9 @@ return {
       "rafamadriz/friendly-snippets",
       {
         "L3MON4D3/LuaSnip",
-        version = "v2.*",
+        -- v2.5.0 still uses vim.F.if_nil (removed in Nvim 0.15).
+        -- Pin the commit that shims vim.nonnil (L3MON4D3/LuaSnip#1440).
+        commit = "e2b79721f73fd43341acee0ff9f7e99e205710cb",
         build = "make install_jsregexp",
         config = function()
           local ls = require("luasnip")

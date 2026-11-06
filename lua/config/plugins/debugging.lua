@@ -131,6 +131,7 @@ return {
         "delve",
         "gofumpt",
         "goimports",
+        "golangci-lint",
         "prettier",
         "stylua",
         "google-java-format",

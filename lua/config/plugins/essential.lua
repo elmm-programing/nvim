@@ -38,6 +38,9 @@ return {
   -- Buffer tabs
   {
     "akinsho/bufferline.nvim",
+    -- PR #1051: vim.nonnil when available (checkhealth vim.F.if_nil).
+    -- Not on bufferline main (still 4.9.1); pin the commit.
+    commit = "24f6ae78b1fcb01b66e806c0373ec46a15f0f66d",
     event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {

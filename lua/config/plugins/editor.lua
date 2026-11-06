@@ -49,7 +49,8 @@ return {
 
   {
     "nvim-telescope/telescope.nvim",
-    branch = "0.1.x",
+    -- v0.2.x fixes Neovim 0.11+ LSP picker crashes (encoding, jump_to_location).
+    version = "0.2.1",
     dependencies = {
       "nvim-lua/plenary.nvim",
       {
@@ -156,6 +157,9 @@ return {
           "gomod",
           "gosum",
           "gotmpl",
+          "gowork",
+          "sql",
+          "comment",
           "java",
           "javascript",
           "typescript",
@@ -199,10 +203,11 @@ return {
         incremental_selection = {
           enable = true,
           keymaps = {
+            -- Avoid gr* — Neovim 0.11+ uses that prefix for default LSP maps
             init_selection = "gnn",
-            node_incremental = "grn",
-            node_decremental = "grm",
-            scope_incremental = "grc",
+            node_incremental = "gni",
+            node_decremental = "gnd",
+            scope_incremental = "gns",
           },
         },
         textobjects = {

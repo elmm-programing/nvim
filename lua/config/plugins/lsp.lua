@@ -95,6 +95,13 @@ return {
         severity_sort = true,
       })
 
+      -- Neovim 0.11+ maps grn/gra/grr/gri/grt/grx, so `gr` is a prefix and waits
+      -- on timeoutlen / which-key instead of jumping to references.
+      for _, lhs in ipairs({ "grr", "grn", "gra", "gri", "grt", "grx" }) do
+        pcall(vim.keymap.del, "n", lhs)
+      end
+      pcall(vim.keymap.del, { "v", "x" }, "gra")
+
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("LspConfig", { clear = true }),
         callback = function(args)
@@ -119,7 +126,7 @@ return {
             end, vim.tbl_extend("force", opts, { desc = "Go to declaration" }))
             vim.keymap.set("n", "gr", function()
               require("telescope.builtin").lsp_references({ include_current_line = false })
-            end, vim.tbl_extend("force", opts, { desc = "Find references" }))
+            end, vim.tbl_extend("force", opts, { desc = "Find references", nowait = true }))
             vim.keymap.set("n", "gi", function()
               require("telescope.builtin").lsp_implementations({ reuse_win = true })
             end, vim.tbl_extend("force", opts, { desc = "Go to implementation" }))
@@ -202,6 +209,7 @@ return {
 
       configure_server("gopls", {
         capabilities = capabilities,
+        filetypes = { "go", "gomod", "gowork" },
         settings = {
           gopls = {
             analyses = {
@@ -287,19 +295,47 @@ return {
       }
       local ok_store, schemastore = pcall(require, "schemastore")
       if ok_store then
-        json_settings.json.schemas = schemastore.json.schemas()
-        yaml_settings.yaml.schemas = schemastore.yaml.schemas()
+        json_settings.json.schemas = schemastore.json.schemas({
+          select = {
+            "package.json",
+            "tsconfig.json",
+            ".eslintrc",
+            "prettierrc.json",
+            "jsconfig.json",
+          },
+        })
+        yaml_settings.yaml.schemas = schemastore.yaml.schemas({
+          select = {
+            "GitHub Workflow",
+            "GitHub Action",
+            "docker-compose.yml",
+          },
+        })
       end
       configure_server("jsonls", {
         capabilities = capabilities,
+        filetypes = { "json", "jsonc" },
         settings = json_settings,
       })
       configure_server("yamlls", {
         capabilities = capabilities,
+        filetypes = { "yaml", "yml" },
         settings = yaml_settings,
       })
 
-      configure_server("tailwindcss", { capabilities = capabilities })
+      configure_server("tailwindcss", {
+        capabilities = capabilities,
+        filetypes = {
+          "html",
+          "css",
+          "scss",
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact",
+          "vue",
+        },
+      })
       configure_server("html", {
         capabilities = capabilities,
         filetypes = { "html" },
