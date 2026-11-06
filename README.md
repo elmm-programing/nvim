@@ -1,7 +1,9 @@
 # nvim
 
-Personal Neovim 0.11+ config for **Go**, **Java**, **Vue/Nuxt/TypeScript**, and **Rust**.
-Not LazyVim. Tokyo Night, blink.cmp, Mason, no AI plugins.
+Personal Neovim 0.11+ config for **Vue/Nuxt**, **JavaScript**, **TypeScript**, **Java**, and **Go**.
+Not LazyVim. Solarized Osaka, blink.cmp, Mason, no Copilot.
+
+Citrix or another locked-down desktop: [docs/citrix.md](docs/citrix.md). No admin install.
 
 ## Install
 
@@ -10,7 +12,7 @@ git clone https://github.com/elmm-programing/nvim.git ~/.config/nvim
 nvim
 ```
 
-First launch runs `:Lazy sync` (plugin install) and Mason tool install. Need `git`, `make`, a Nerd Font, and language toolchains you actually use (`go`, JDK 17/21 via SDKMAN, Node for Vue/TS, `rustup`).
+First launch runs `:Lazy sync` (plugin install) and Mason tool install. Need `git`, a Nerd Font, and the language toolchains you actually use (`node` for Vue/TS, JDK 17/21, `go`). `make` is optional. `rg` is required for live grep. `lazygit` is required for `;g`.
 
 `main` and `Mac` are kept identical.
 
@@ -40,12 +42,22 @@ Tailwind / hex / rgb colors highlight in buffer via `nvim-highlight-colors` (bli
 | Keys | Action |
 |---|---|
 | `<leader><leader>` / `<leader>/` | Files / grep |
-| `<leader>e` | Neo-tree |
-| `gd` `gr` `gi` `gy` `K` | LSP |
+| `;f` `;r` `;;` `\\` | Files (hidden) / live grep (hidden) / resume / buffers |
+| `;e` `;n` `;h` `;g` | Diagnostics / notifier history / git hunks / lazygit |
+| `<leader>e` / `<leader>sf` | Neo-tree / oil float with preview |
+| `gd` `gr` `gi` `gy` `K` | LSP (`gd` stays definition) |
 | `<leader>cI` / `:LspInfo` | LSP client status |
 | `<leader>ca` `<leader>cr` `<leader>cf` | Code action / rename / format |
+| `:ToggleFormatter` | Format on save for this buffer |
+| `<leader>gb` `<leader>gB` | Line blame / buffer blame |
+| `<leader>gh` `<leader>gs` | Stage hunk / stage buffer |
+| `<leader>gd` `<leader>gv` `<leader>gH` | Diff overlay / diff view / file history |
+| `<leader>gy` | Copy a GitHub link |
+| `<leader>yf` `<leader>yp` | Copy `path#Lline` / absolute |
+| `<leader>jp` | `package.json` float |
 | `]b` `[b` | Buffers |
-| `]c` `[c` | Next/prev class (Treesitter; `]]` is Vim sections) |
+| `]c` `[c` | Next/prev class (Treesitter) |
+| `]]` `[[` | Next/prev word under the cursor, once an LSP is attached |
 | `]m` `[m` | Next/prev function |
 | `<leader>tt` | Nearest test |
 | `<leader>Db` `<leader>Dc` | Breakpoint / continue |
@@ -55,6 +67,7 @@ Tailwind / hex / rgb colors highlight in buffer via `nvim-highlight-colors` (bli
 ## Intentional
 
 - **No Copilot / Gemini / Avante / Ollama.**
+- **Not a Neovim 0.12 rewrite.** `vim.pack`, ui2, and `:restart` are not used, so the config still starts language servers on older Neovim.
 - **Snacks `image` is off.** Hover image preview crashes Treesitter on this stack.
 - Files over 1MB use Snacks `bigfile` (Treesitter/LSP/format skipped).
 - Prettier follows the project's `.prettierrc` (no hardcoded `--no-semi`).

@@ -82,6 +82,87 @@ map("n", "<leader>uu", "<cmd>UndotreeToggle<CR>", { desc = "Toggle undotree" })
 map("n", "<leader>sn", function()
   require("snacks.notifier").show_history()
 end, { desc = "Notifier history", silent = true })
+
+local function copy_location(absolute)
+  local name = vim.api.nvim_buf_get_name(0)
+  if name == "" then
+    vim.notify("No file name", vim.log.levels.WARN)
+    return
+  end
+  local path = absolute and vim.fn.fnamemodify(name, ":p") or vim.fn.fnamemodify(name, ":.")
+  local text = path .. "#L" .. vim.api.nvim_win_get_cursor(0)[1]
+  vim.fn.setreg("+", text)
+  vim.notify(text, vim.log.levels.INFO)
+end
+
+map("n", "<leader>yf", function()
+  copy_location(false)
+end, { desc = "Copy path and line" })
+map("n", "<leader>yp", function()
+  copy_location(true)
+end, { desc = "Copy absolute path and line" })
+
+map("v", "<leader>cc", function()
+  local start_line = vim.fn.line("v")
+  local end_line = vim.fn.line(".")
+  if start_line > end_line then
+    start_line, end_line = end_line, start_line
+  end
+  local lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
+  local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":.")
+  if path == "" then
+    path = "[No Name]"
+  end
+  local short = {
+    typescriptreact = "tsx",
+    javascriptreact = "jsx",
+    typescript = "ts",
+    javascript = "js",
+  }
+  local lang = short[vim.bo.filetype] or vim.bo.filetype
+  local block = string.format('```%s filename="%s" line="%d"\n%s\n```', lang, path, start_line, table.concat(lines, "\n"))
+  vim.fn.setreg("+", block)
+  vim.notify("Copied code block", vim.log.levels.INFO)
+end, { desc = "Copy as Markdown code block" })
+
+map("n", "<leader>jp", function()
+  local loop = vim.uv or vim.loop
+  local found = vim.fs.find("package.json", { upward = true, stop = loop.os_homedir(), type = "file" })
+  local path = found[1]
+  if not path then
+    vim.notify("No package.json found", vim.log.levels.WARN)
+    return
+  end
+  local buf = vim.fn.bufadd(path)
+  vim.fn.bufload(buf)
+  local width = math.floor(vim.o.columns * 0.8)
+  local height = math.floor(vim.o.lines * 0.8)
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = "editor",
+    width = width,
+    height = height,
+    col = math.floor((vim.o.columns - width) / 2),
+    row = math.floor((vim.o.lines - height) / 2),
+    border = "rounded",
+  })
+  local function close()
+    if vim.api.nvim_win_is_valid(win) then
+      vim.api.nvim_win_close(win, true)
+    end
+  end
+  vim.keymap.set("n", "q", function()
+    local config = vim.api.nvim_win_get_config(0)
+    if config.relative ~= "" then
+      close()
+    end
+  end, { buffer = buf, nowait = true, desc = "Close package.json" })
+  vim.keymap.set("n", "<Esc>", function()
+    local config = vim.api.nvim_win_get_config(0)
+    if config.relative ~= "" then
+      close()
+    end
+  end, { buffer = buf, nowait = true, desc = "Close package.json" })
+end, { desc = "Open package.json" })
 map("n", "<leader>sm", function()
   local msgs = vim.api.nvim_exec2("messages", { output = true }).output
   if msgs == "" then

@@ -31,7 +31,7 @@ return {
     opts = {
       ensure_installed = {
         "gopls",
-        "ts_ls",
+        "vtsls",
         "jdtls",
         "lua_ls",
         "yamlls",
@@ -80,8 +80,8 @@ return {
 
       local signs = { Error = "", Warn = "", Hint = "", Info = "" }
       vim.diagnostic.config({
-        virtual_text = { spacing = 4, prefix = "●" },
-        float = { source = "always", border = "rounded", header = "", prefix = "" },
+        virtual_text = { spacing = 4, prefix = "●", source = "if_many" },
+        float = { source = "if_many", border = "rounded", header = "", prefix = "" },
         signs = {
           text = {
             [vim.diagnostic.severity.ERROR] = signs.Error,
@@ -195,8 +195,7 @@ return {
 
           local hint_servers = {
             gopls = true,
-            ts_ls = true,
-            volar = true,
+            vtsls = true,
             vue_ls = true,
             jdtls = true,
             rust_analyzer = true,
@@ -233,43 +232,117 @@ return {
         },
       })
 
-      configure_server("ts_ls", {
+      local vue_language_server = vim.fn.stdpath("data")
+        .. "/mason/packages/vue-language-server/node_modules/@vue/language-server"
+      local function mason_typescript_lib()
+        local candidates = {
+          vim.fn.stdpath("data") .. "/mason/packages/vtsls/node_modules/typescript/lib",
+          vim.fn.stdpath("data") .. "/mason/packages/vue-language-server/node_modules/typescript/lib",
+        }
+        for _, path in ipairs(candidates) do
+          if vim.fn.isdirectory(path) == 1 then
+            return path
+          end
+        end
+        return candidates[1]
+      end
+      local function workspace_typescript_lib(root)
+        if not root or root == "" then
+          return nil
+        end
+        local lib = root .. "/node_modules/typescript/lib"
+        if vim.fn.isdirectory(lib) == 1 then
+          return lib
+        end
+        return nil
+      end
+
+      -- vtsls owns JS/TS and .vue (via @vue/typescript-plugin). vue_ls attaches only to .vue.
+      configure_server("vtsls", {
         capabilities = capabilities,
-        filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact" },
+        filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact", "vue" },
         settings = {
-          typescript = {
-            inlayHints = {
-              parameterNames = { enabled = "all" },
-              parameterTypes = { enabled = true },
-              variableTypes = { enabled = true },
-              propertyDeclarationTypes = { enabled = true },
-              functionLikeReturnTypes = { enabled = true },
+          vtsls = {
+            autoUseWorkspaceTsdk = true,
+            enableMoveToFileCodeAction = true,
+            tsserver = {
+              globalPlugins = {
+                {
+                  name = "@vue/typescript-plugin",
+                  location = vue_language_server,
+                  languages = { "vue" },
+                  configNamespace = "typescript",
+                  enableForWorkspaceTypeScriptVersions = true,
+                },
+              },
             },
-            preferences = { includePackageJsonAutoImports = "auto" },
           },
-          javascript = {
+          typescript = {
+            updateImportsOnFileMove = { enabled = "always" },
+            preferences = { includePackageJsonAutoImports = "auto" },
             inlayHints = {
               parameterNames = { enabled = "literals" },
-              parameterTypes = { enabled = true },
-              variableTypes = { enabled = true },
+              parameterTypes = { enabled = false },
+              variableTypes = { enabled = false },
+              propertyDeclarationTypes = { enabled = false },
+              functionLikeReturnTypes = { enabled = false },
+            },
+          },
+          javascript = {
+            updateImportsOnFileMove = { enabled = "always" },
+            inlayHints = {
+              parameterNames = { enabled = "literals" },
+              parameterTypes = { enabled = false },
+              variableTypes = { enabled = false },
             },
           },
         },
       })
 
-      -- Volar only on .vue; ts_ls handles standalone TS/JS
-      configure_server("volar", {
+      configure_server("vue_ls", {
         capabilities = capabilities,
         filetypes = { "vue" },
         init_options = {
-          typescript = {
-            tsdk = vim.fn.stdpath("data") .. "/mason/packages/typescript-language-server/node_modules/typescript/lib",
-          },
-          vue = { hybridMode = false },
+          vue = { hybridMode = true },
+          typescript = { tsdk = mason_typescript_lib() },
         },
         settings = {
           vue = { complete = { tagCasing = "kebab" } },
         },
+        before_init = function(_, config)
+          local tsdk = workspace_typescript_lib(config.root_dir) or mason_typescript_lib()
+          config.init_options = vim.tbl_deep_extend("force", config.init_options or {}, {
+            typescript = { tsdk = tsdk },
+            vue = { hybridMode = true },
+          })
+        end,
+        on_init = function(client)
+          client.handlers["tsserver/request"] = function(_, result, context)
+            local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
+            local ts_clients = get_clients({ bufnr = context.bufnr, name = "vtsls" })
+            if #ts_clients == 0 then
+              vim.notify("vue_ls needs vtsls on this buffer", vim.log.levels.ERROR)
+              return
+            end
+            local ts_client = ts_clients[1]
+            if not ts_client.exec_cmd or type(result) ~= "table" then
+              return
+            end
+            local param = unpack(result)
+            if type(param) ~= "table" then
+              return
+            end
+            local id, command, payload = unpack(param)
+            ts_client:exec_cmd({
+              title = "vue_request_forward",
+              command = "typescript.tsserverRequest",
+              arguments = { command, payload },
+            }, { bufnr = context.bufnr }, function(_, response)
+              local body = response and response.body
+              client:notify("tsserver/response", { { id, body } })
+            end)
+          end
+        end,
       })
 
       configure_server("lua_ls", {
@@ -353,8 +426,8 @@ return {
       if vim.lsp.enable then
         vim.lsp.enable({
           "gopls",
-          "ts_ls",
-          "volar",
+          "vtsls",
+          "vue_ls",
           "lua_ls",
           "jsonls",
           "tailwindcss",

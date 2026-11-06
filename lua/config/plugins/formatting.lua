@@ -2,7 +2,7 @@ return {
   {
     "stevearc/conform.nvim",
     event = { "BufWritePre" },
-    cmd = { "ConformInfo" },
+    cmd = { "ConformInfo", "ToggleFormatter" },
     keys = {
       {
         "<leader>cf",
@@ -33,12 +33,23 @@ return {
         rust = { "rustfmt" },
       },
       format_on_save = function(bufnr)
-        if vim.b[bufnr].large_file or vim.bo[bufnr].filetype == "bigfile" then
+        if vim.b[bufnr].disable_format_on_save or vim.b[bufnr].large_file or vim.bo[bufnr].filetype == "bigfile" then
           return
         end
         return { timeout_ms = 2000, lsp_format = "fallback" }
       end,
     },
+    config = function(_, opts)
+      require("conform").setup(opts)
+      vim.api.nvim_create_user_command("ToggleFormatter", function()
+        local bufnr = vim.api.nvim_get_current_buf()
+        vim.b[bufnr].disable_format_on_save = not vim.b[bufnr].disable_format_on_save
+        vim.notify(
+          vim.b[bufnr].disable_format_on_save and "Format on save disabled" or "Format on save enabled",
+          vim.log.levels.INFO
+        )
+      end, { desc = "Toggle format on save for this buffer" })
+    end,
   },
 
   {

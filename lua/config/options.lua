@@ -34,8 +34,57 @@ opt.swapfile = false
 opt.backup = false
 opt.undodir = vim.fn.stdpath("data") .. "/undodir"
 opt.undofile = true
--- clipboard can block on WSL/SSH/macOS; attach after UI is up
+-- clipboard can block on WSL/SSH/macOS; attach after UI is up.
+-- Citrix and SSH sessions often have no clipboard tool. OSC 52 lets yank
+-- reach the local terminal when that is the case, or when NVIM_FORCE_OSC52=1.
 vim.schedule(function()
+  local function has_clipboard_tool()
+    if vim.fn.has("win32") == 1 or vim.fn.has("wsl") == 1 then
+      return true
+    end
+    for _, exe in ipairs({ "pbcopy", "wl-copy", "xclip", "xsel", "win32yank" }) do
+      if vim.fn.executable(exe) == 1 then
+        return true
+      end
+    end
+    return false
+  end
+
+  local remote = vim.env.SSH_TTY or vim.env.SSH_CONNECTION or vim.env.CITRIX or vim.env.CITRIX_VERSION
+  local force = vim.env.NVIM_FORCE_OSC52 == "1"
+  if force or (remote and not has_clipboard_tool()) then
+    local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
+    if ok then
+      vim.g.clipboard = {
+        name = "osc52",
+        copy = { ["+"] = osc52.copy("+"), ["*"] = osc52.copy("*") },
+        paste = { ["+"] = osc52.paste("+"), ["*"] = osc52.paste("*") },
+      }
+    else
+      local copied = { "" }
+      local function encode(text)
+        if vim.base64 and vim.base64.encode then
+          return vim.base64.encode(text)
+        end
+        return vim.fn.system({ "base64" }, text):gsub("%s+", "")
+      end
+      local function copy(lines)
+        copied = lines
+        local payload = "\027]52;c;" .. encode(table.concat(lines, "\n")) .. "\027\\"
+        if vim.api.nvim_ui_send then
+          pcall(vim.api.nvim_ui_send, payload)
+        else
+          io.stdout:write(payload)
+          io.stdout:flush()
+        end
+      end
+      vim.g.clipboard = {
+        name = "osc52",
+        copy = { ["+"] = copy, ["*"] = copy },
+        paste = { ["+"] = function() return copied end, ["*"] = function() return copied end },
+      }
+    end
+  end
   vim.opt.clipboard = "unnamedplus"
 end)
 

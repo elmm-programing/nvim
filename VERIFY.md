@@ -8,21 +8,21 @@ After pull / restart: `:Lazy sync` then work through this list.
 - [ ] `:checkhealth mason`
 - [ ] `:checkhealth lsp`
 - [ ] `:Mason` — tools from `mason-tool-installer`: gofumpt, goimports, delve, golangci-lint, prettier, eslint_d, stylua, google-java-format, java-debug-adapter, java-test, js-debug-adapter, vue-language-server, rust-analyzer, codelldb
-- [ ] `:Mason` — language servers from `mason-lspconfig`: gopls, ts_ls, jdtls, lua_ls, yamlls, jsonls, dockerls, bashls, tailwindcss, html, cssls, emmet_ls
+- [ ] `:Mason` — language servers from `mason-lspconfig`: gopls, vtsls, jdtls, lua_ls, yamlls, jsonls, dockerls, bashls, tailwindcss, html, cssls, emmet_ls
 
 ## 1. LSP ownership (no overlaps)
 
 | Filetype | Expected clients (`:LspInfo`) |
 |----------|-------------------------------|
-| `.ts` / `.tsx` / `.js` | `ts_ls` only |
-| `.vue` | `volar` only (`hybridMode` is off) |
+| `.ts` / `.tsx` / `.js` | `vtsls` only |
+| `.vue` | `vtsls` + `vue_ls` (hybrid; workspace TypeScript when `node_modules/typescript` exists) |
 | `.go` | `gopls` (`go`, `gomod`, `gowork`) |
 | `.java` | `jdtls` once (nvim-jdtls only) |
 | `.lua` | `lua_ls` |
 | `.json` / `.jsonc` | `jsonls` (SchemaStore limited to package.json, tsconfig, eslintrc, prettierrc, jsconfig) |
 | `.yaml` / `.yml` | `yamlls` (SchemaStore limited to GitHub Workflow, GitHub Action, docker-compose) |
 
-`vue-language-server` is installed by Mason. The client name is `volar`, not `vue_ls` or `vtsls`.
+`vue-language-server` is installed by Mason. The Vue client name is `vue_ls`. TypeScript is `vtsls`, including inside `.vue`.
 
 ## 2. Format on save (conform)
 
@@ -32,6 +32,7 @@ After pull / restart: `:Lazy sync` then work through this list.
 - [ ] Lua → stylua
 - [ ] Rust → rustfmt
 - [ ] `:ConformInfo` shows formatters available
+- [ ] `:ToggleFormatter` turns format-on-save off for this buffer, then back on
 
 ## 3. Debug
 
@@ -73,12 +74,15 @@ Press `<leader>` and confirm groups:
 Spot-checks:
 
 - [ ] `<C-h/j/k/l>` move windows (signature help stays on `gK` / insert `<C-s>`)
-- [ ] `<leader>uh` toggles inlay hints (on by default for gopls, ts_ls, volar, jdtls, rust_analyzer)
+- [ ] `<leader>uh` toggles inlay hints (on by default for gopls, vtsls, vue_ls, jdtls, rust_analyzer; vtsls hints are parameter names only)
 - [ ] `<leader>\` floating terminal
 - [ ] `<leader>y` yank history
 - [ ] `<leader>a` harpoon add
 - [ ] `>p` / `<p` swap parameters (treesitter)
-- [ ] `<leader>gc` Neogit commit · `<leader>gL` Telescope git log
+- [ ] `<leader>gc` Neogit commit · `<leader>gL` Telescope git log · `<leader>gbr` git branches
+- [ ] `;f` hidden files · `;r` hidden grep · `;;` resume · `;g` lazygit (needs the `lazygit` binary)
+- [ ] `<leader>sf` oil float · `<leader>gd` diff overlay · `<leader>gv` diff view · `<leader>yf` copies `path#Lline`
+- [ ] `<leader>jp` opens the nearest `package.json` · `q` closes that float
 - [ ] `<leader>qs` restore session · `<leader>ql` last session · `<leader>qS` save session · `<leader>qd` stop saving
 - [ ] `gr` finds references immediately (default `grn` / `gra` / `grr` / `gri` / `grt` / `grx` are removed)
 - [ ] Treesitter incremental selection: `gnn` start, `gni` expand, `gnd` shrink, `gns` scope
@@ -108,8 +112,8 @@ brew install tree-sitter   # or cargo install tree-sitter-cli
 ## Quick smoke (2 minutes)
 
 ```text
-1. nvim somefile.ts   → :LspInfo → ts_ls
-2. nvim App.vue       → :LspInfo → volar
+1. nvim somefile.ts   → :LspInfo → vtsls
+2. nvim App.vue       → :LspInfo → vtsls + vue_ls
 3. nvim main.go       → save → formatted; <leader>Gr run
 4. nvim Main.java     → :LspInfo → jdtls; <leader>ji organize
 5. <leader>tt         → neotest runs

@@ -76,8 +76,65 @@ return {
       { "<leader>fr", "<cmd>Telescope resume<CR>", desc = "Resume picker", silent = true },
       { "<leader>ft", "<cmd>TodoTelescope<CR>", desc = "Todo comments", silent = true },
       { "<leader>gf", "<cmd>Telescope git_files<CR>", desc = "Git files", silent = true },
-      { "<leader>gb", "<cmd>Telescope git_branches<CR>", desc = "Git branches", silent = true },
+      { "<leader>gbr", "<cmd>Telescope git_branches<CR>", desc = "Git branches", silent = true },
       { "<leader>gL", "<cmd>Telescope git_commits<CR>", desc = "Git log", silent = true },
+      {
+        ";f",
+        function()
+          require("telescope.builtin").find_files({ hidden = true })
+        end,
+        desc = "Find files",
+      },
+      {
+        ";r",
+        function()
+          require("telescope.builtin").live_grep({
+            additional_args = function()
+              return { "--hidden", "--glob", "!.git/*" }
+            end,
+          })
+        end,
+        desc = "Live grep",
+      },
+      { ";;", "<cmd>Telescope resume<CR>", desc = "Resume picker" },
+      { "\\\\", "<cmd>Telescope buffers<CR>", desc = "Buffers" },
+      { ";e", "<cmd>Telescope diagnostics<CR>", desc = "Diagnostics" },
+      {
+        ";n",
+        function()
+          require("snacks.notifier").show_history()
+        end,
+        desc = "Notification history",
+      },
+      {
+        ";h",
+        function()
+          local ok, snacks = pcall(require, "snacks")
+          if ok and snacks.picker and snacks.picker.git_hunks then
+            snacks.picker.git_hunks()
+            return
+          end
+          require("telescope.builtin").git_status()
+        end,
+        desc = "Git hunks",
+      },
+      {
+        ";g",
+        function()
+          if vim.fn.executable("lazygit") ~= 1 then
+            vim.notify("lazygit is not installed", vim.log.levels.WARN)
+            return
+          end
+          if vim.v.servername == nil or vim.v.servername == "" then
+            pcall(vim.fn.serverstart)
+          end
+          local snacks = require("snacks")
+          if snacks.lazygit then
+            snacks.lazygit()
+          end
+        end,
+        desc = "Lazygit",
+      },
     },
     config = function()
       local telescope = require("telescope")
@@ -165,6 +222,8 @@ return {
           "typescript",
           "tsx",
           "vue",
+          "graphql",
+          "jsdoc",
           "html",
           "css",
           "scss",
@@ -265,10 +324,35 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     keys = {
       { "-", "<cmd>Oil<CR>", desc = "Open parent directory" },
+      {
+        "<leader>sf",
+        function()
+          require("oil").open_float(nil, { preview = { vertical = true } })
+        end,
+        desc = "Oil float",
+      },
     },
     opts = {
       default_file_explorer = false,
+      columns = { "icon", "permissions", "size", "mtime" },
       view_options = { show_hidden = true },
+      lsp_file_methods = {
+        enabled = true,
+        timeout_ms = 2000,
+        autosave_changes = true,
+      },
+      keymaps = {
+        ["h"] = { "actions.parent", mode = "n" },
+        ["q"] = { "actions.close", mode = "n" },
+      },
+      float = {
+        max_width = 200,
+        border = "rounded",
+        preview_split = "right",
+      },
+      preview_win = {
+        update_on_cursor_moved = true,
+      },
     },
   },
 
@@ -413,6 +497,9 @@ return {
       dashboard = { enabled = true },
       statuscolumn = { enabled = true },
       input = { enabled = true },
+      words = { enabled = true },
+      scroll = { enabled = false },
+      lazygit = { enabled = true },
       bigfile = { enabled = true, size = 1024 * 1024 },
       quickfile = { enabled = true },
       -- Image preview in hover/docs crashes Treesitter on this stack; keep off.

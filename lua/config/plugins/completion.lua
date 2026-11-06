@@ -44,6 +44,7 @@ return {
         nerd_font_variant = "mono",
       },
       completion = {
+        accept = { auto_brackets = { enabled = true } },
         documentation = {
           auto_show = true,
           auto_show_delay_ms = 200,
@@ -51,7 +52,7 @@ return {
           treesitter_highlighting = false,
           window = { border = "rounded" },
         },
-        ghost_text = { enabled = true },
+        ghost_text = { enabled = false },
         menu = {
           border = "rounded",
           draw = {
@@ -100,6 +101,16 @@ return {
         },
       },
       snippets = { preset = "luasnip" },
+      cmdline = {
+        enabled = true,
+        keymap = { preset = "enter" },
+        sources = { "cmdline" },
+        completion = {
+          menu = { auto_show = true },
+          list = { selection = { preselect = false, auto_insert = false } },
+          ghost_text = { enabled = false },
+        },
+      },
     },
   },
 

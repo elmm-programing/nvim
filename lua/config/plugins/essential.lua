@@ -4,35 +4,110 @@ return {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons", "SmiteshP/nvim-navic" },
-    opts = {
-      options = {
-        theme = "tokyonight",
-        component_separators = { left = "", right = "" },
-        section_separators = { left = "", right = "" },
-        disabled_filetypes = { statusline = { "dashboard", "alpha", "neo-tree", "snacks_dashboard" } },
-      },
-      sections = {
-        lualine_a = { "mode" },
-        lualine_b = { "branch", "diff", "diagnostics" },
-        lualine_c = {
-          { "filename", path = 1, symbols = { modified = " ●", readonly = " ", unnamed = "" } },
-          {
-            "navic",
-            cond = function()
-              return package.loaded["nvim-navic"] and require("nvim-navic").is_available()
-            end,
+    opts = function()
+      local root_markers = { ".git", "package.json", "nuxt.config.ts", "nuxt.config.js", "go.mod", "pom.xml", "build.gradle" }
+
+      local function project_name()
+        local cwd = vim.fn.getcwd()
+        local root = vim.fs.root(0, root_markers)
+        if not root or root == cwd then
+          return ""
+        end
+        return vim.fs.basename(root) .. " "
+      end
+
+      local function pretty_path()
+        local name = vim.api.nvim_buf_get_name(0)
+        if name == "" then
+          return "[No Name]"
+        end
+        local relative = vim.fn.fnamemodify(name, ":.")
+        local parts = vim.split(relative, "[/\\]", { trimempty = true })
+        if #parts > 3 then
+          return parts[1] .. "/…/" .. parts[#parts]
+        end
+        return relative
+      end
+
+      local function recording()
+        local reg = vim.fn.reg_recording()
+        if reg == "" then
+          return ""
+        end
+        return "recording @" .. reg
+      end
+
+      vim.api.nvim_create_autocmd({ "RecordingEnter", "RecordingLeave", "CursorMoved" }, {
+        group = vim.api.nvim_create_augroup("LualineRefresh", { clear = true }),
+        callback = function()
+          pcall(function()
+            require("lualine").refresh({ place = { "statusline" } })
+          end)
+        end,
+      })
+
+      return {
+        options = {
+          theme = "auto",
+          component_separators = { left = "", right = "" },
+          section_separators = { left = "", right = "" },
+          disabled_filetypes = { statusline = { "dashboard", "alpha", "neo-tree", "snacks_dashboard" } },
+        },
+        sections = {
+          lualine_a = { "mode" },
+          lualine_b = { "branch" },
+          lualine_c = {
+            { project_name, color = { gui = "bold" } },
+            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
+            { pretty_path },
+            {
+              "navic",
+              cond = function()
+                return package.loaded["nvim-navic"] and require("nvim-navic").is_available()
+              end,
+            },
           },
+          lualine_x = {
+            { recording, color = { gui = "bold" } },
+            "diagnostics",
+            "diff",
+          },
+          lualine_y = { "progress" },
+          lualine_z = { "location" },
         },
-        lualine_x = {
-          { "encoding", cond = function() return vim.bo.fileencoding ~= "utf-8" end },
-          { "fileformat", cond = function() return vim.bo.fileformat ~= "unix" end },
-          "filetype",
+        extensions = { "neo-tree", "lazy", "mason", "trouble" },
+      }
+    end,
+  },
+
+  {
+    "b0o/incline.nvim",
+    event = "BufReadPre",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      local devicons = require("nvim-web-devicons")
+      require("incline").setup({
+        hide = { cursorline = true },
+        window = {
+          margin = { vertical = 0, horizontal = 1 },
+          placement = { horizontal = "right", vertical = "top" },
         },
-        lualine_y = { "progress" },
-        lualine_z = { "location" },
-      },
-      extensions = { "neo-tree", "lazy", "mason", "trouble" },
-    },
+        render = function(props)
+          local bufname = vim.api.nvim_buf_get_name(props.buf)
+          local filename = bufname ~= "" and vim.fn.fnamemodify(bufname, ":t") or "[No Name]"
+          local items = {}
+          if vim.bo[props.buf].modified then
+            table.insert(items, { "[+] ", group = "WarningMsg" })
+          end
+          local icon, color = devicons.get_icon_color(filename)
+          if icon then
+            table.insert(items, { icon .. " ", guifg = color })
+          end
+          table.insert(items, { filename })
+          return items
+        end,
+      })
+    end,
   },
 
   -- Buffer tabs
