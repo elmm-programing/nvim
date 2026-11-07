@@ -1,8 +1,8 @@
 # Install on a Citrix work VM
 
-This machine cannot reach the work desktop. Install from inside the VM, without admin rights. The config stays on lazy.nvim and does not need Neovim 0.12.
+Install from inside the VM. The scripts do not use admin rights and do not change the system PATH. They only change your user PATH.
 
-You need `git` already on the image, or a portable `git` you are allowed to run. Outbound HTTPS to GitHub and the Mason registries (GitHub, npm) has to work. If the VM uses a proxy, set it before every command below:
+`git` has to already be on the machine. Outbound HTTPS to GitHub, nodejs.org, go.dev, and the Adoptium JDK has to work. If the VM uses a proxy, set it before the command:
 
 ```bash
 export HTTPS_PROXY=http://proxy.example:8080
@@ -16,65 +16,41 @@ $env:HTTPS_PROXY = "http://proxy.example:8080"
 $env:HTTP_PROXY = "http://proxy.example:8080"
 ```
 
-## Linux
+## One command
 
-Neovim 0.11 or newer, user-local:
-
-```bash
-mkdir -p ~/bin ~/src
-curl -fsSL -o /tmp/nvim.tar.gz https://github.com/neovim/neovim/releases/download/v0.11.4/nvim-linux-x86_64.tar.gz
-tar -xzf /tmp/nvim.tar.gz -C ~/src
-ln -sf ~/src/nvim-linux-x86_64/bin/nvim ~/bin/nvim
-```
-
-Add `~/bin` to `PATH` in the shell startup file you are allowed to edit.
+Ubuntu and macOS:
 
 ```bash
-git clone https://github.com/elmm-programing/nvim.git ~/.config/nvim
-nvim
+curl -fsSL https://raw.githubusercontent.com/elmm-programing/nvim/cursor/video-nvim-citrix-499f/install.sh | bash
 ```
 
-The first launch runs Lazy and installs plugins. Then `:Mason` and wait until these are present: `vtsls`, `vue-language-server`, `gopls`, `jdtls`, prettier, `eslint_d`, gofumpt, delve.
-
-`make` is optional. Telescope's fzf-native build skips itself when `make` is missing.
-
-## Windows
-
-Neovim 0.11 or newer, user-local. In PowerShell:
+Windows PowerShell:
 
 ```powershell
-$dir = Join-Path $env:LOCALAPPDATA "nvim-win64"
-New-Item -ItemType Directory -Force -Path $dir | Out-Null
-$zip = Join-Path $env:TEMP "nvim-win64.zip"
-Invoke-WebRequest -Uri "https://github.com/neovim/neovim/releases/download/v0.11.4/nvim-win64.zip" -OutFile $zip
-Expand-Archive -Path $zip -DestinationPath $dir -Force
+irm https://raw.githubusercontent.com/elmm-programing/nvim/cursor/video-nvim-citrix-499f/install.ps1 | iex
 ```
 
-The zip contains a `nvim-win64` folder. The executable is `$dir\nvim-win64\bin\nvim.exe`. Add that `bin` directory to the **user** PATH (Settings, Environment Variables, Path for your account). Do not change the system PATH.
+Open a new terminal when it finishes, then run `nvim`.
 
-```powershell
-git clone https://github.com/elmm-programing/nvim.git "$env:LOCALAPPDATA\nvim"
-nvim
-```
+## What it installs
 
-Then the same `:Mason` check as on Linux.
+Tools go to `~/.local/nvim-tools` on Ubuntu and macOS, and to `%LOCALAPPDATA%\nvim-tools` on Windows. A tool is skipped when a new enough copy is already on `PATH`:
 
-## Tools the VM may not have
+- Neovim 0.11 or newer. Otherwise Neovim 0.11.4 is downloaded.
+- Node.js 20 or newer. Otherwise Node.js 22.
+- Go, any version. Otherwise the current stable Go release.
+- Java 17 or newer. Otherwise Temurin JDK 21. `JAVA_HOME` points at that JDK when this script installed it.
+- `rg`, `fd`, and `lazygit` when the command is missing.
 
-Download release binaries into `~/bin` or `%LOCALAPPDATA%\bin` and add that directory to the user PATH. No installer is required.
+The config is cloned to `~/.config/nvim` (Windows: `%LOCALAPPDATA%\nvim`) from branch `cursor/video-nvim-citrix-499f`. If that folder already exists, it is left alone.
 
-| Tool | Used for |
-|---|---|
-| `rg` (ripgrep) | `;r` and `<leader>fg` live grep. Without it, grep pickers do nothing useful. |
-| `fd` | faster file search. Telescope falls back to its find command when `fd` is missing. |
-| `lazygit` | `;g` float. The keymap tells you if the binary is missing. |
-| Node.js | Mason language servers for Vue, TypeScript, and ESLint. A zip extract of Node is enough. |
-| Go | `gopls` and Go tools. A zip extract, with `~/go/bin` on `PATH`. This config prepends `~/go/bin` when that directory exists. |
-| JDK 17 or 21 | Java and `jdtls`. A zip extract is enough. `JAVA_HOME` must point at it. |
+The script then runs `:Lazy sync` and `:MasonInstall` for the servers and tools in `lua/config/plugins/lsp.lua` and `lua/config/plugins/debugging.lua`, including `gopls`, `vtsls`, `jdtls`, `vue-language-server`, prettier, `eslint_d`, gofumpt, and delve. Mason stops after 15 minutes and prints anything still missing.
+
+A C compiler is not installed. Telescope's fzf-native build skips itself when `make` is missing. Treesitter parsers need `gcc` or `clang`.
 
 ## Fonts and clipboard
 
-Icons in the tabline, statusline, and completion menu need a Nerd Font. The reference setup uses PlemolJP Console NF. If the image blocks font install, Neovim still runs and those icons show as boxes.
+Icons need a Nerd Font. The reference setup uses PlemolJP Console NF. If the image blocks font install, Neovim still runs and those icons show as boxes.
 
 Citrix clipboard redirection often fails. When the session is remote and no clipboard program is installed, this config copies through OSC 52. If a clipboard program exists but the paste still stays inside the VM, start Neovim with:
 

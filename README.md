@@ -7,12 +7,23 @@ Citrix or another locked-down desktop: [docs/citrix.md](docs/citrix.md). No admi
 
 ## Install
 
+One command. It does not need admin rights. `git` must already be installed. A proxy already set in `HTTPS_PROXY` is used.
+
+Ubuntu and macOS:
+
 ```bash
-git clone https://github.com/elmm-programing/nvim.git ~/.config/nvim
-nvim
+curl -fsSL https://raw.githubusercontent.com/elmm-programing/nvim/cursor/video-nvim-citrix-499f/install.sh | bash
 ```
 
-First launch runs `:Lazy sync` (plugin install) and Mason tool install. Need `git`, a Nerd Font, and the language toolchains you actually use (`node` for Vue/TS, JDK 17/21, `go`). `make` is optional. `rg` is required for live grep. `lazygit` is required for `;g`.
+Windows PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/elmm-programing/nvim/cursor/video-nvim-citrix-499f/install.ps1 | iex
+```
+
+The script installs Neovim 0.11.4, Node 22, Go, Temurin JDK 21, ripgrep, fd, and lazygit into your user account when those tools are missing or too old. It then clones this config and installs the Mason language servers and formatters. Open a new terminal and run `nvim`.
+
+Citrix and the full list of what is skipped when a tool is already present: [docs/citrix.md](docs/citrix.md).
 
 `main` and `Mac` are kept identical.
 
