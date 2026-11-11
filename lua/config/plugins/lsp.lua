@@ -4,6 +4,20 @@ return {
     cmd = "Mason",
     build = ":MasonUpdate",
     opts = {
+      registries = {
+        -- Listed first so it overrides the GitHub registry copy of vue-language-server.
+        "lua:config.mason.registry",
+        "github:mason-org/mason-registry",
+      },
+      npm = {
+        -- Work networks often serve a stale @vue packument, so npm reports
+        -- ETARGET for @vue/language-core even though the version exists.
+        install_args = {
+          "--registry",
+          "https://registry.npmjs.org/",
+          "--prefer-online",
+        },
+      },
       ui = {
         border = "rounded",
         icons = {
