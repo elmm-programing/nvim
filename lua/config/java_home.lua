@@ -1,5 +1,11 @@
 local M = {}
 
+-- jdtls 1.63 bundles such as org.eclipse.core.filesystem are Java 25 class
+-- files (major 69). JDK 21 can load the equinox launcher and then fail while
+-- resolving those bundles. Older JDKs stay available as project runtimes.
+local LAUNCHER_MIN = 25
+local PROJECT_MIN = 17
+
 local function trim_slash(path)
   if type(path) ~= "string" then
     return nil
@@ -214,7 +220,7 @@ function M.find(opts)
     return cached
   end
 
-  local function classify(home, usable, older, runtimes)
+  local function classify(home, usable, project, older, runtimes)
     local bin = M.executable(home)
     if not bin then
       return
@@ -222,24 +228,28 @@ function M.find(opts)
     local item = { home = home, bin = bin, major = M.major(bin) }
     if not is_jdk(home) then
       runtimes[#runtimes + 1] = item
-    elseif item.major and item.major < 17 then
+    elseif not item.major or item.major < PROJECT_MIN then
       older[#older + 1] = item
+    elseif item.major < LAUNCHER_MIN then
+      project[#project + 1] = item
     else
       usable[#usable + 1] = item
     end
   end
 
   local usable = {}
+  local project = {}
   local older = {}
   local runtimes = {}
   for _, home in ipairs(collect(opts)) do
-    classify(home, usable, older, runtimes)
+    classify(home, usable, project, older, runtimes)
   end
 
   if #usable == 0 and opts == nil then
-    classify(home_from_login_shell(), usable, older, runtimes)
+    classify(home_from_login_shell(), usable, project, older, runtimes)
   end
 
+  M.last_project = project
   M.last_older = older
   M.last_runtimes = runtimes
 
@@ -252,11 +262,18 @@ function M.find(opts)
 
   local result
   if best then
+    local installed = {}
+    for _, item in ipairs(usable) do
+      installed[#installed + 1] = item
+    end
+    for _, item in ipairs(project) do
+      installed[#installed + 1] = item
+    end
     result = {
       home = best.home,
       bin = best.bin,
       major = best.major,
-      installed = usable,
+      installed = installed,
     }
   end
 
@@ -305,12 +322,19 @@ end
 
 function M.missing_message()
   local parts = {
-    "No JDK 17 or newer found.",
+    "jdtls needs a JDK 25 or newer to start.",
     "Looked in JAVA_HOME, ~/.local/nvim-tools/jdk, /usr/lib/jvm, /usr/bin/java, and your login shell.",
   }
+  local project = M.last_project or {}
   local older = M.last_older or {}
   local runtimes = M.last_runtimes or {}
-  if older[1] then
+  if project[1] then
+    parts[#parts + 1] = "Found Java "
+      .. tostring(project[1].major)
+      .. " at "
+      .. project[1].home
+      .. ". That JDK can build the project, but this jdtls build is compiled for Java 25."
+  elseif older[1] then
     parts[#parts + 1] = "Found Java "
       .. tostring(older[1].major)
       .. " at "
@@ -319,7 +343,7 @@ function M.missing_message()
   elseif runtimes[1] then
     parts[#parts + 1] = "Found a Java runtime at " .. runtimes[1].home .. " without javac."
   end
-  parts[#parts + 1] = "Re-run the installer, or set JAVA_HOME to a JDK 17 directory."
+  parts[#parts + 1] = "Re-run the installer, or install a JDK 25. Leave any older JDK in place so projects can keep using it."
   return table.concat(parts, " ")
 end
 

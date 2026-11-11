@@ -1,5 +1,30 @@
 local java_home_mod = require("config.java_home")
 
+-- Multi-module Maven trees have a pom.xml in every module. The closest one
+-- would start a separate jdtls workspace per module and miss sibling sources.
+-- Use the git root when that directory itself is a build, otherwise the
+-- nearest build file.
+local function project_root(fname)
+  local markers = {
+    "pom.xml",
+    "build.gradle",
+    "build.gradle.kts",
+    "settings.gradle",
+    "settings.gradle.kts",
+    "mvnw",
+    "gradlew",
+  }
+  local git = vim.fs.root(fname, ".git")
+  if git then
+    for _, marker in ipairs(markers) do
+      if vim.uv.fs_stat(git .. "/" .. marker) then
+        return git
+      end
+    end
+  end
+  return vim.fs.root(fname, markers) or git
+end
+
 local function java_debug_bundles()
   local mason = vim.fn.stdpath("data") .. "/mason/packages"
   local bundles = vim.fn.glob(
@@ -7,7 +32,22 @@ local function java_debug_bundles()
     false,
     true
   )
-  vim.list_extend(bundles, vim.fn.glob(mason .. "/java-test/extension/server/*.jar", false, true))
+  -- java-test ships a few jars that are not OSGi bundles, and an asm jar that
+  -- jdtls already installed. Passing those in makes jdtls abort bundle load.
+  local skip = {
+    ["com.microsoft.java.test.runner-jar-with-dependencies.jar"] = true,
+    ["jacocoagent.jar"] = true,
+  }
+  local shipped = {}
+  for _, jar in ipairs(vim.fn.glob(mason .. "/jdtls/plugins/*.jar", false, true)) do
+    shipped[vim.fn.fnamemodify(jar, ":t")] = true
+  end
+  for _, jar in ipairs(vim.fn.glob(mason .. "/java-test/extension/server/*.jar", false, true)) do
+    local name = vim.fn.fnamemodify(jar, ":t")
+    if not skip[name] and not shipped[name] then
+      bundles[#bundles + 1] = jar
+    end
+  end
   return bundles
 end
 
@@ -56,6 +96,13 @@ return {
       if ok_blink then
         capabilities = blink.get_lsp_capabilities(capabilities)
       end
+      -- jdtls omits hoverProvider from initialize when the client allows
+      -- dynamic registration, and only registers textDocument/hover after the
+      -- workspace import finishes. Neovim refuses K until that registration,
+      -- so Shift+K does nothing for the whole startup. Ask for a static provider.
+      if capabilities.textDocument and capabilities.textDocument.hover then
+        capabilities.textDocument.hover.dynamicRegistration = false
+      end
 
       local warned = false
       local function warn(message)
@@ -86,7 +133,7 @@ return {
         local java_home = found.home
         local java_bin = found.bin
 
-        local root_dir = vim.fs.root(fname, { "gradlew", "mvnw", "pom.xml", "build.gradle", "build.gradle.kts", ".git" })
+        local root_dir = project_root(fname)
         local project = root_dir and vim.fs.basename(root_dir) or "default"
         local cmd = {
           java_bin,

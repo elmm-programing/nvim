@@ -111,10 +111,12 @@ if need_cmd go && go version >/dev/null 2>&1; then
 fi
 
 have_java=0
-# Ubuntu often has a JRE (java) without a JDK (javac). jdtls needs javac.
+# jdtls 1.63+ bundles are compiled for Java 25. A JRE has no javac, and a
+# JDK 17 or 21 can still be the project's runtime, but neither can start
+# this language server.
 if need_cmd javac; then
   java_ver="$(javac -version 2>&1 | awk '{ print $NF }')"
-  if version_ge "$java_ver" "17.0.0"; then
+  if version_ge "$java_ver" "25.0.0"; then
     have_java=1
   fi
 fi
@@ -195,7 +197,7 @@ resolve_java_home() {
 }
 
 if [ "$have_java" -eq 1 ]; then
-  echo "Java ${java_ver} is already new enough."
+  echo "Java ${java_ver} can run jdtls."
   java_bin="$(command -v javac || true)"
   if [ -n "$java_bin" ]; then
     resolved_home="$(resolve_java_home "$java_bin")"
@@ -204,13 +206,14 @@ if [ "$have_java" -eq 1 ]; then
     fi
   fi
 else
+  echo "jdtls needs JDK 25. Installing Temurin JDK 25."
   case "${os}-${cpu}" in
     linux-x64) jdk_os="linux"; jdk_arch="x64" ;;
     linux-arm64) jdk_os="linux"; jdk_arch="aarch64" ;;
     mac-x64) jdk_os="mac"; jdk_arch="x64" ;;
     mac-arm64) jdk_os="mac"; jdk_arch="aarch64" ;;
   esac
-  download "https://api.adoptium.net/v3/binary/latest/21/ga/${jdk_os}/${jdk_arch}/jdk/hotspot/normal/eclipse?project=jdk" "$tmp/jdk.tar.gz"
+  download "https://api.adoptium.net/v3/binary/latest/25/ga/${jdk_os}/${jdk_arch}/jdk/hotspot/normal/eclipse?project=jdk" "$tmp/jdk.tar.gz"
   rm -rf "$tmp/jdk-src" "$PREFIX/jdk"
   extract_tar "$tmp/jdk.tar.gz" "$tmp/jdk-src"
   java_bin="$(find "$tmp/jdk-src" -type f -path '*/bin/java' | head -n 1)"
@@ -272,13 +275,10 @@ cat > "${PREFIX}/env.sh" << 'EOF'
 export NVIM_TOOLS="${HOME}/.local/nvim-tools"
 export GOBIN="${HOME}/go/bin"
 export PATH="${NVIM_TOOLS}/bin:${NVIM_TOOLS}/node/bin:${NVIM_TOOLS}/go/bin:${GOBIN}:${PATH}"
-if [ -x "${NVIM_TOOLS}/jdk/bin/java" ]; then
+# Neovim launches jdtls from ~/.local/nvim-tools/jdk on its own.
+# Leave an existing JDK on PATH so a Java 17 project keeps its java command.
+if [ -z "${JAVA_HOME:-}" ] && ! command -v javac >/dev/null 2>&1 && [ -x "${NVIM_TOOLS}/jdk/bin/java" ]; then
   export JAVA_HOME="${NVIM_TOOLS}/jdk"
-elif [ -f "${NVIM_TOOLS}/java-home" ]; then
-  JAVA_HOME="$(head -n 1 "${NVIM_TOOLS}/java-home")"
-  export JAVA_HOME
-fi
-if [ -n "${JAVA_HOME:-}" ] && [ -x "${JAVA_HOME}/bin/java" ]; then
   export PATH="${JAVA_HOME}/bin:${PATH}"
 fi
 EOF

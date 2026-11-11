@@ -39,7 +39,7 @@ Tools go to `~/.local/nvim-tools` on Ubuntu and macOS, and to `%LOCALAPPDATA%\nv
 - Neovim 0.11 or newer. Otherwise Neovim 0.11.4 is downloaded. Ubuntu's packaged Neovim is older than that. Starting `nvim` still loads this config, and the config switches to `~/.local/nvim-tools/nvim/bin/nvim` when that copy exists.
 - Node.js 20 or newer. Otherwise Node.js 22.
 - Go, any version. Otherwise the current stable Go release.
-- A JDK 17 or newer (`java` and `javac`). A Java runtime without `javac` is not enough. Otherwise Temurin JDK 21. The chosen JDK path is written to `~/.local/nvim-tools/java-home`, so a desktop session that never sourced `JAVA_HOME` can still start jdtls. Neovim also checks `/usr/lib/jvm`, `/usr/bin/java`, and the login shell.
+- A JDK 25 or newer (`java` and `javac`) to run jdtls. Current jdtls builds ship Java 25 class files, so a JDK 17 or 21 already on the machine is not enough to start the language server. Those older JDKs are still registered as project runtimes when they are installed. Otherwise the script downloads Temurin JDK 25. The launcher JDK path is written to `~/.local/nvim-tools/java-home`, so a desktop session that never sourced `JAVA_HOME` can still start jdtls. Neovim also checks `/usr/lib/jvm`, `/usr/bin/java`, and the login shell.
 - `rg`, `fd`, and `lazygit` when the command is missing.
 
 The config is cloned to `~/.config/nvim` (Windows: `%LOCALAPPDATA%\nvim`) from `main`. If that folder already exists, it is left alone.

@@ -86,11 +86,12 @@ if (Test-Command "node") {
   }
 }
 $haveGo = Test-Command "go"
+$javaOnPath = (Test-Command "java") -and (Test-Command "javac")
 $haveJava = $false
 if ((Test-Command "java") -and (Test-Command "javac")) {
   $javaLine = (& java -version 2>&1 | Select-Object -First 1) -join ""
   if ($javaLine -match '"(\d+\.\d+\.\d+)') {
-    $haveJava = Test-VersionGe $Matches[1] "17.0.0"
+    $haveJava = Test-VersionGe $Matches[1] "25.0.0"
   }
 }
 $haveRg = Test-Command "rg"
@@ -130,7 +131,7 @@ try {
   }
 
   if ($haveJava) {
-    Write-Host "Java is already new enough."
+    Write-Host "Java can run jdtls."
     $javaCmd = Get-Command javac -ErrorAction SilentlyContinue
     if ($javaCmd) {
       $javaHome = Split-Path (Split-Path $javaCmd.Source -Parent) -Parent
@@ -139,8 +140,9 @@ try {
       }
     }
   } else {
+    Write-Host "jdtls needs JDK 25. Installing Temurin JDK 25."
     $zip = Join-Path $temp "jdk.zip"
-    Get-File "https://api.adoptium.net/v3/binary/latest/21/ga/windows/x64/jdk/hotspot/normal/eclipse?project=jdk" $zip
+    Get-File "https://api.adoptium.net/v3/binary/latest/25/ga/windows/x64/jdk/hotspot/normal/eclipse?project=jdk" $zip
     Expand-Zip $zip (Join-Path $temp "jdk-src")
     $java = Get-ChildItem (Join-Path $temp "jdk-src") -Recurse -Filter "java.exe" | Select-Object -First 1
     if (-not $java) { Fail "JDK archive did not contain java.exe." }
@@ -186,6 +188,7 @@ foreach ($dir in @(
     (Join-Path $Prefix "go\bin"),
     (Join-Path $Prefix "jdk\bin")
   )) {
+  if ($javaOnPath -and $dir -eq (Join-Path $Prefix "jdk\bin")) { continue }
   if (Test-Path $dir) { $entries += $dir }
 }
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -203,7 +206,7 @@ foreach ($entry in $entries) {
 [Environment]::SetEnvironmentVariable("Path", ($parts -join ";"), "User")
 [Environment]::SetEnvironmentVariable("GOBIN", $GoBin, "User")
 $jdkHome = Join-Path $Prefix "jdk"
-if (Test-Path (Join-Path $jdkHome "bin\java.exe")) {
+if (-not $javaOnPath -and (Test-Path (Join-Path $jdkHome "bin\java.exe"))) {
   [Environment]::SetEnvironmentVariable("JAVA_HOME", $jdkHome, "User")
   $env:JAVA_HOME = $jdkHome
 }

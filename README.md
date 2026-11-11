@@ -21,7 +21,7 @@ Windows PowerShell:
 irm https://raw.githubusercontent.com/elmm-programing/nvim/main/install.ps1 | iex
 ```
 
-The script installs Neovim 0.11.4, Node 22, Go, Temurin JDK 21, ripgrep, fd, and lazygit into your user account when those tools are missing or too old. It then clones this config and installs the Mason language servers and formatters. Open a new terminal and run `nvim`.
+The script installs Neovim 0.11.4, Node 22, Go, Temurin JDK 25, ripgrep, fd, and lazygit into your user account when those tools are missing or too old. It then clones this config and installs the Mason language servers and formatters. Open a new terminal and run `nvim`.
 
 Citrix and the full list of what is skipped when a tool is already present: [docs/citrix.md](docs/citrix.md).
 
