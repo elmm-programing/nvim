@@ -142,6 +142,10 @@ else
   extract_tar "$tmp/nvim.tar.gz" "$tmp/nvim-src"
   mv "$tmp/nvim-src"/nvim-* "$PREFIX/nvim"
   ln -sfn "$PREFIX/nvim/bin/nvim" "$BIN/nvim"
+  # Ubuntu login sessions already search ~/.local/bin, before /usr/bin.
+  # That keeps apt's older nvim from winning when bashrc has not been read.
+  mkdir -p "${HOME}/.local/bin"
+  ln -sfn "$PREFIX/nvim/bin/nvim" "${HOME}/.local/bin/nvim"
 fi
 
 if [ "$have_node" -eq 1 ]; then
@@ -252,11 +256,11 @@ EOF
 
 snippet='# nvim-tools
 [ -f "$HOME/.local/nvim-tools/env.sh" ] && . "$HOME/.local/nvim-tools/env.sh"'
-for rc in "${HOME}/.bashrc" "${HOME}/.zshrc"; do
+for rc in "${HOME}/.bashrc" "${HOME}/.zshrc" "${HOME}/.profile"; do
   if [ -f "$rc" ] && grep -q 'nvim-tools/env.sh' "$rc"; then
     continue
   fi
-  if [ -f "$rc" ] || [ "$rc" = "${HOME}/.bashrc" ] || [ "$rc" = "${HOME}/.zshrc" ]; then
+  if [ -f "$rc" ] || [ "$rc" = "${HOME}/.bashrc" ] || [ "$rc" = "${HOME}/.zshrc" ] || [ "$rc" = "${HOME}/.profile" ]; then
     printf '\n%s\n' "$snippet" >> "$rc"
   fi
 done

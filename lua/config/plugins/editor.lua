@@ -1,3 +1,16 @@
+local function telescope(picker, opts)
+  return function()
+    require("telescope.builtin")[picker](opts)
+  end
+end
+
+-- 0.2.x does not create :Telescope on Neovim before 0.10.4. Ubuntu apt is often
+-- that old, which surfaces as E492. Homebrew on macOS is new enough for 0.2.x.
+local telescope_version = "0.1.8"
+if vim.fn.has("nvim-0.10.4") == 1 or vim.fn.has("nvim-0.11") == 1 then
+  telescope_version = "0.2.1"
+end
+
 return {
   {
     "nvim-neo-tree/neo-tree.nvim",
@@ -50,14 +63,17 @@ return {
   {
     "nvim-telescope/telescope.nvim",
     -- v0.2.x fixes Neovim 0.11+ LSP picker crashes (encoding, jump_to_location).
-    version = "0.2.1",
+    version = telescope_version,
     dependencies = {
       "nvim-lua/plenary.nvim",
       {
         "nvim-telescope/telescope-fzf-native.nvim",
         build = "make",
         cond = function()
-          return vim.fn.executable("make") == 1
+          local compiler = vim.fn.executable("cc") == 1
+            or vim.fn.executable("gcc") == 1
+            or vim.fn.executable("clang") == 1
+          return vim.fn.executable("make") == 1 and compiler
         end,
       },
       "nvim-telescope/telescope-ui-select.nvim",
@@ -65,19 +81,19 @@ return {
     },
     cmd = "Telescope",
     keys = {
-      { "<leader>ff", "<cmd>Telescope find_files<CR>", desc = "Find files", silent = true },
-      { "<leader>fg", "<cmd>Telescope live_grep<CR>", desc = "Live grep", silent = true },
-      { "<leader>fb", "<cmd>Telescope buffers<CR>", desc = "Buffers", silent = true },
-      { "<leader>fh", "<cmd>Telescope help_tags<CR>", desc = "Help tags", silent = true },
-      { "<leader>fo", "<cmd>Telescope oldfiles<CR>", desc = "Recent files", silent = true },
-      { "<leader>fc", "<cmd>Telescope commands<CR>", desc = "Commands", silent = true },
-      { "<leader>fk", "<cmd>Telescope keymaps<CR>", desc = "Keymaps", silent = true },
-      { "<leader>fd", "<cmd>Telescope diagnostics<CR>", desc = "Diagnostics", silent = true },
-      { "<leader>fr", "<cmd>Telescope resume<CR>", desc = "Resume picker", silent = true },
+      { "<leader>ff", telescope("find_files"), desc = "Find files", silent = true },
+      { "<leader>fg", telescope("live_grep"), desc = "Live grep", silent = true },
+      { "<leader>fb", telescope("buffers"), desc = "Buffers", silent = true },
+      { "<leader>fh", telescope("help_tags"), desc = "Help tags", silent = true },
+      { "<leader>fo", telescope("oldfiles"), desc = "Recent files", silent = true },
+      { "<leader>fc", telescope("commands"), desc = "Commands", silent = true },
+      { "<leader>fk", telescope("keymaps"), desc = "Keymaps", silent = true },
+      { "<leader>fd", telescope("diagnostics"), desc = "Diagnostics", silent = true },
+      { "<leader>fr", telescope("resume"), desc = "Resume picker", silent = true },
       { "<leader>ft", "<cmd>TodoTelescope<CR>", desc = "Todo comments", silent = true },
-      { "<leader>gf", "<cmd>Telescope git_files<CR>", desc = "Git files", silent = true },
-      { "<leader>gbr", "<cmd>Telescope git_branches<CR>", desc = "Git branches", silent = true },
-      { "<leader>gL", "<cmd>Telescope git_commits<CR>", desc = "Git log", silent = true },
+      { "<leader>gf", telescope("git_files"), desc = "Git files", silent = true },
+      { "<leader>gbr", telescope("git_branches"), desc = "Git branches", silent = true },
+      { "<leader>gL", telescope("git_commits"), desc = "Git log", silent = true },
       {
         ";f",
         function()
@@ -96,9 +112,9 @@ return {
         end,
         desc = "Live grep",
       },
-      { ";;", "<cmd>Telescope resume<CR>", desc = "Resume picker" },
-      { "\\\\", "<cmd>Telescope buffers<CR>", desc = "Buffers" },
-      { ";e", "<cmd>Telescope diagnostics<CR>", desc = "Diagnostics" },
+      { ";;", telescope("resume"), desc = "Resume picker" },
+      { "\\\\", telescope("buffers"), desc = "Buffers" },
+      { ";e", telescope("diagnostics"), desc = "Diagnostics" },
       {
         ";n",
         function()

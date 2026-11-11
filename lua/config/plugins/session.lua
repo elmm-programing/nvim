@@ -40,7 +40,19 @@ return {
       require("project_nvim").setup(opts)
     end,
     keys = {
-      { "<leader>fp", "<cmd>Telescope projects<cr>", desc = "Find projects" },
+      {
+        "<leader>fp",
+        function()
+          local telescope_ok, telescope = pcall(require, "telescope")
+          if not telescope_ok then
+            vim.notify("Telescope is not available", vim.log.levels.WARN)
+            return
+          end
+          telescope.load_extension("projects")
+          telescope.extensions.projects.projects()
+        end,
+        desc = "Find projects",
+      },
       { "<leader>fP", "<cmd>ProjectRoot<cr>", desc = "Set cwd to project root" },
     },
   },

@@ -71,9 +71,14 @@ end, { desc = "Restart LSP clients on this buffer" })
 -- Quick escape from insert mode
 map("i", "kj", "<Esc>", { desc = "Exit insert mode", silent = true })
 
--- Telescope
-map("n", "<leader><leader>", "<cmd>Telescope find_files<CR>", { desc = "Find files", silent = true })
-map("n", "<leader>/", "<cmd>Telescope live_grep<CR>", { desc = "Grep search", silent = true })
+-- Telescope. Call the Lua API so an older Ubuntu Neovim does not try to run
+-- the :Telescope command before that command exists.
+map("n", "<leader><leader>", function()
+  require("telescope.builtin").find_files()
+end, { desc = "Find files", silent = true })
+map("n", "<leader>/", function()
+  require("telescope.builtin").live_grep()
+end, { desc = "Grep search", silent = true })
 
 -- Undotree
 map("n", "<leader>uu", "<cmd>UndotreeToggle<CR>", { desc = "Toggle undotree" })
