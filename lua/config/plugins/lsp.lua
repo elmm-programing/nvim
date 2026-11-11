@@ -79,7 +79,24 @@ return {
           vim.lsp.config(name, opts)
           return
         end
+        local ok = pcall(require, "lspconfig.configs." .. name)
+        if not ok then
+          return false
+        end
         require("lspconfig")[name].setup(opts)
+        return true
+      end
+
+      -- nvim-lspconfig still calls this server "volar" on Neovim 0.10.
+      local vue_server = "vue_ls"
+      if not vim.lsp.config then
+        local has_vue = pcall(require, "lspconfig.configs.vue_ls")
+        local has_volar = pcall(require, "lspconfig.configs.volar")
+        if not has_vue and has_volar then
+          vue_server = "volar"
+        elseif not has_vue then
+          vue_server = nil
+        end
       end
 
       local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -211,6 +228,7 @@ return {
             gopls = true,
             vtsls = true,
             vue_ls = true,
+            volar = true,
             jdtls = true,
             rust_analyzer = true,
           }
@@ -313,7 +331,8 @@ return {
         },
       })
 
-      configure_server("vue_ls", {
+      if vue_server then
+      configure_server(vue_server, {
         capabilities = capabilities,
         filetypes = { "vue" },
         init_options = {
@@ -358,6 +377,7 @@ return {
           end
         end,
       })
+      end
 
       configure_server("lua_ls", {
         capabilities = capabilities,
@@ -438,10 +458,9 @@ return {
       -- jdtls is started only by nvim-jdtls.
       -- setup() already starts servers on Neovim before 0.11.
       if vim.lsp.enable then
-        vim.lsp.enable({
+        local servers = {
           "gopls",
           "vtsls",
-          "vue_ls",
           "lua_ls",
           "jsonls",
           "tailwindcss",
@@ -451,7 +470,11 @@ return {
           "yamlls",
           "dockerls",
           "bashls",
-        })
+        }
+        if vue_server then
+          table.insert(servers, 3, vue_server)
+        end
+        vim.lsp.enable(servers)
       end
     end,
   },

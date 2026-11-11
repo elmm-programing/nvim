@@ -1,94 +1,4 @@
-local function sdkman_java(major)
-  local base = vim.fn.expand("~/.sdkman/candidates/java")
-  if vim.fn.isdirectory(base) == 0 then
-    return nil
-  end
-  local matches = vim.fn.glob(base .. "/" .. tostring(major) .. "*", false, true)
-  local dirs = {}
-  for _, path in ipairs(matches) do
-    if vim.fn.isdirectory(path) == 1 then
-      table.insert(dirs, path)
-    end
-  end
-  table.sort(dirs)
-  return dirs[#dirs]
-end
-
-local function java_executable(home)
-  if type(home) ~= "string" or home == "" then
-    return nil
-  end
-  local names = { home .. "/bin/java", home .. "/bin/java.exe" }
-  for _, bin in ipairs(names) do
-    if vim.fn.executable(bin) == 1 then
-      return bin
-    end
-  end
-  return nil
-end
-
-local function home_of_java_bin(bin)
-  if not bin or bin == "" then
-    return nil
-  end
-  local home = vim.fn.fnamemodify(bin, ":h:h")
-  if java_executable(home) then
-    return home
-  end
-  return nil
-end
-
-local function find_java_home()
-  local candidates = {
-    vim.env.JAVA_HOME,
-    vim.fn.expand("~/.local/nvim-tools/jdk"),
-    sdkman_java(21),
-    sdkman_java(17),
-    vim.fn.expand("~/.sdkman/candidates/java/current"),
-    home_of_java_bin(vim.fn.exepath("java")),
-  }
-  local jvms = vim.fn.glob("/usr/lib/jvm/*", false, true)
-  table.sort(jvms)
-  for _, path in ipairs(jvms) do
-    table.insert(candidates, path)
-  end
-  for _, path in ipairs(candidates) do
-    if java_executable(path) then
-      return path
-    end
-  end
-  return nil
-end
-
-local function java_major(bin)
-  local out = vim.fn.system({ bin, "-version" })
-  local quoted = out:match('version "([^"]+)"') or ""
-  local modern = quoted:match("^(%d+)")
-  local legacy = quoted:match("^1%.(%d+)")
-  return tonumber(legacy or modern)
-end
-
-local function java_runtimes(fallback_home, fallback_major)
-  local java21 = sdkman_java(21)
-  local java17 = sdkman_java(17)
-  local current = vim.fn.expand("~/.sdkman/candidates/java/current")
-  if not java21 and vim.fn.isdirectory(current) == 1 then
-    java21 = current
-  end
-
-  local runtimes = {}
-  if java21 then
-    table.insert(runtimes, { name = "JavaSE-21", path = java21, default = true })
-  end
-  if java17 then
-    table.insert(runtimes, { name = "JavaSE-17", path = java17 })
-  end
-  if #runtimes == 0 and fallback_home then
-    local name = fallback_major and ("JavaSE-" .. fallback_major) or "JavaSE"
-    table.insert(runtimes, { name = name, path = fallback_home, default = true })
-  end
-  return runtimes
-end
+local java_home_mod = require("config.java_home")
 
 local function java_debug_bundles()
   local mason = vim.fn.stdpath("data") .. "/mason/packages"
@@ -168,17 +78,13 @@ return {
           return
         end
 
-        local java_home = find_java_home()
-        local java_bin = java_executable(java_home)
-        if not java_bin then
-          warn("No JDK found. Install one or set JAVA_HOME. This config also looks in ~/.local/nvim-tools/jdk.")
+        local found = java_home_mod.find()
+        if not found then
+          warn(java_home_mod.missing_message())
           return
         end
-        local major = java_major(java_bin)
-        if major and major < 17 then
-          warn("jdtls needs JDK 17 or newer. Found Java " .. major .. " at " .. java_bin .. ".")
-          return
-        end
+        local java_home = found.home
+        local java_bin = found.bin
 
         local root_dir = vim.fs.root(fname, { "gradlew", "mvnw", "pom.xml", "build.gradle", "build.gradle.kts", ".git" })
         local project = root_dir and vim.fs.basename(root_dir) or "default"
@@ -219,7 +125,7 @@ return {
               eclipse = { downloadSources = true },
               configuration = {
                 updateBuildConfiguration = "automatic",
-                runtimes = java_runtimes(java_home, major),
+                runtimes = java_home_mod.runtimes(found),
               },
               maven = { downloadSources = true },
               implementationsCodeLens = { enabled = true },

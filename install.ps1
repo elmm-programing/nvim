@@ -87,7 +87,7 @@ if (Test-Command "node") {
 }
 $haveGo = Test-Command "go"
 $haveJava = $false
-if (Test-Command "java") {
+if ((Test-Command "java") -and (Test-Command "javac")) {
   $javaLine = (& java -version 2>&1 | Select-Object -First 1) -join ""
   if ($javaLine -match '"(\d+\.\d+\.\d+)') {
     $haveJava = Test-VersionGe $Matches[1] "17.0.0"
@@ -131,6 +131,13 @@ try {
 
   if ($haveJava) {
     Write-Host "Java is already new enough."
+    $javaCmd = Get-Command javac -ErrorAction SilentlyContinue
+    if ($javaCmd) {
+      $javaHome = Split-Path (Split-Path $javaCmd.Source -Parent) -Parent
+      if (Test-Path (Join-Path $javaHome "bin\java.exe")) {
+        Set-Content -Path (Join-Path $Prefix "java-home") -Value $javaHome -Encoding ascii
+      }
+    }
   } else {
     $zip = Join-Path $temp "jdk.zip"
     Get-File "https://api.adoptium.net/v3/binary/latest/21/ga/windows/x64/jdk/hotspot/normal/eclipse?project=jdk" $zip
@@ -140,6 +147,7 @@ try {
     $jdkRoot = $java.Directory.Parent.FullName
     if (Test-Path (Join-Path $Prefix "jdk")) { Remove-Item -Recurse -Force (Join-Path $Prefix "jdk") }
     Move-Item $jdkRoot (Join-Path $Prefix "jdk")
+    Set-Content -Path (Join-Path $Prefix "java-home") -Value (Join-Path $Prefix "jdk") -Encoding ascii
   }
 
   function Install-Bin($Name, $Url) {

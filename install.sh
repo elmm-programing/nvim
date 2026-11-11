@@ -111,8 +111,9 @@ if need_cmd go && go version >/dev/null 2>&1; then
 fi
 
 have_java=0
-if need_cmd java; then
-  java_ver="$(java -version 2>&1 | awk -F\" 'NR==1 { print $2 }')"
+# Ubuntu often has a JRE (java) without a JDK (javac). jdtls needs javac.
+if need_cmd javac; then
+  java_ver="$(javac -version 2>&1 | awk '{ print $NF }')"
   if version_ge "$java_ver" "17.0.0"; then
     have_java=1
   fi
@@ -178,8 +179,30 @@ else
   mv "$tmp/go-src/go" "$PREFIX/go"
 fi
 
+resolve_java_home() {
+  local bin="$1"
+  local target="$bin"
+  local next guard=0
+  while [ -L "$target" ] && [ "$guard" -lt 20 ]; do
+    next="$(readlink "$target")"
+    case "$next" in
+      /*) target="$next" ;;
+      *) target="$(cd "$(dirname "$target")" && pwd)/$next" ;;
+    esac
+    guard=$((guard + 1))
+  done
+  (cd "$(dirname "$target")/.." && pwd)
+}
+
 if [ "$have_java" -eq 1 ]; then
   echo "Java ${java_ver} is already new enough."
+  java_bin="$(command -v javac || true)"
+  if [ -n "$java_bin" ]; then
+    resolved_home="$(resolve_java_home "$java_bin")"
+    if [ -x "${resolved_home}/bin/java" ]; then
+      printf '%s\n' "$resolved_home" > "$PREFIX/java-home"
+    fi
+  fi
 else
   case "${os}-${cpu}" in
     linux-x64) jdk_os="linux"; jdk_arch="x64" ;;
@@ -193,6 +216,7 @@ else
   java_bin="$(find "$tmp/jdk-src" -type f -path '*/bin/java' | head -n 1)"
   [ -n "$java_bin" ] || die "JDK archive did not contain bin/java."
   mv "$(dirname "$(dirname "$java_bin")")" "$PREFIX/jdk"
+  printf '%s\n' "$PREFIX/jdk" > "$PREFIX/java-home"
 fi
 
 install_bin() {
@@ -250,6 +274,11 @@ export GOBIN="${HOME}/go/bin"
 export PATH="${NVIM_TOOLS}/bin:${NVIM_TOOLS}/node/bin:${NVIM_TOOLS}/go/bin:${GOBIN}:${PATH}"
 if [ -x "${NVIM_TOOLS}/jdk/bin/java" ]; then
   export JAVA_HOME="${NVIM_TOOLS}/jdk"
+elif [ -f "${NVIM_TOOLS}/java-home" ]; then
+  JAVA_HOME="$(head -n 1 "${NVIM_TOOLS}/java-home")"
+  export JAVA_HOME
+fi
+if [ -n "${JAVA_HOME:-}" ] && [ -x "${JAVA_HOME}/bin/java" ]; then
   export PATH="${JAVA_HOME}/bin:${PATH}"
 fi
 EOF
