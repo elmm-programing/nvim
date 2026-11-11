@@ -14,7 +14,61 @@ local function sdkman_java(major)
   return dirs[#dirs]
 end
 
-local function java_runtimes()
+local function java_executable(home)
+  if type(home) ~= "string" or home == "" then
+    return nil
+  end
+  local names = { home .. "/bin/java", home .. "/bin/java.exe" }
+  for _, bin in ipairs(names) do
+    if vim.fn.executable(bin) == 1 then
+      return bin
+    end
+  end
+  return nil
+end
+
+local function home_of_java_bin(bin)
+  if not bin or bin == "" then
+    return nil
+  end
+  local home = vim.fn.fnamemodify(bin, ":h:h")
+  if java_executable(home) then
+    return home
+  end
+  return nil
+end
+
+local function find_java_home()
+  local candidates = {
+    vim.env.JAVA_HOME,
+    vim.fn.expand("~/.local/nvim-tools/jdk"),
+    sdkman_java(21),
+    sdkman_java(17),
+    vim.fn.expand("~/.sdkman/candidates/java/current"),
+    home_of_java_bin(vim.fn.exepath("java")),
+  }
+  local jvms = vim.fn.glob("/usr/lib/jvm/*", false, true)
+  table.sort(jvms)
+  for _, path in ipairs(jvms) do
+    table.insert(candidates, path)
+  end
+  for _, path in ipairs(candidates) do
+    if java_executable(path) then
+      return path
+    end
+  end
+  return nil
+end
+
+local function java_major(bin)
+  local out = vim.fn.system({ bin, "-version" })
+  local quoted = out:match('version "([^"]+)"') or ""
+  local modern = quoted:match("^(%d+)")
+  local legacy = quoted:match("^1%.(%d+)")
+  return tonumber(legacy or modern)
+end
+
+local function java_runtimes(fallback_home, fallback_major)
   local java21 = sdkman_java(21)
   local java17 = sdkman_java(17)
   local current = vim.fn.expand("~/.sdkman/candidates/java/current")
@@ -29,11 +83,9 @@ local function java_runtimes()
   if java17 then
     table.insert(runtimes, { name = "JavaSE-17", path = java17 })
   end
-  if #runtimes == 0 then
-    local java_home = vim.env.JAVA_HOME
-    if java_home and vim.fn.isdirectory(java_home) == 1 then
-      table.insert(runtimes, { name = "JavaSE", path = java_home, default = true })
-    end
+  if #runtimes == 0 and fallback_home then
+    local name = fallback_major and ("JavaSE-" .. fallback_major) or "JavaSE"
+    table.insert(runtimes, { name = name, path = fallback_home, default = true })
   end
   return runtimes
 end
@@ -49,6 +101,40 @@ local function java_debug_bundles()
   return bundles
 end
 
+local function jdtls_layout()
+  local data = vim.fn.stdpath("data")
+  local roots = {
+    data .. "/mason/packages/jdtls",
+    data .. "/mason/share/jdtls",
+  }
+  local os_config = "config_linux"
+  if vim.fn.has("mac") == 1 then
+    os_config = "config_mac"
+  elseif vim.fn.has("win32") == 1 then
+    os_config = "config_win"
+  end
+  for _, root in ipairs(roots) do
+    local jars = vim.fn.glob(root .. "/plugins/org.eclipse.equinox.launcher_*.jar", false, true)
+    local jar = jars[1]
+    if not jar and vim.fn.filereadable(root .. "/plugins/org.eclipse.equinox.launcher.jar") == 1 then
+      jar = root .. "/plugins/org.eclipse.equinox.launcher.jar"
+    end
+    local config = root .. "/" .. os_config
+    if vim.fn.isdirectory(config) == 0 then
+      config = root .. "/config"
+    end
+    if jar and vim.fn.isdirectory(config) == 1 then
+      local lombok = root .. "/lombok.jar"
+      return {
+        jar = jar,
+        config = config,
+        lombok = vim.fn.filereadable(lombok) == 1 and lombok or nil,
+      }
+    end
+  end
+  return nil
+end
+
 return {
   {
     "mfussenegger/nvim-jdtls",
@@ -61,30 +147,70 @@ return {
         capabilities = blink.get_lsp_capabilities(capabilities)
       end
 
-      local mason_jdtls = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
-      local cmd = { vim.fn.exepath("jdtls") }
-      if cmd[1] == "" then
-        cmd = { mason_jdtls .. "/bin/jdtls" }
-      end
-      local lombok = mason_jdtls .. "/lombok.jar"
-      if vim.fn.filereadable(lombok) == 1 then
-        table.insert(cmd, "--jvm-arg=-javaagent:" .. lombok)
+      local warned = false
+      local function warn(message)
+        if warned then
+          return
+        end
+        warned = true
+        vim.notify(message, vim.log.levels.ERROR)
       end
 
       local function attach()
         local fname = vim.api.nvim_buf_get_name(0)
+        if fname == "" or vim.bo.filetype ~= "java" then
+          return
+        end
+
+        local layout = jdtls_layout()
+        if not layout then
+          warn("jdtls is not installed. Run :MasonInstall jdtls, then reopen the Java file.")
+          return
+        end
+
+        local java_home = find_java_home()
+        local java_bin = java_executable(java_home)
+        if not java_bin then
+          warn("No JDK found. Install one or set JAVA_HOME. This config also looks in ~/.local/nvim-tools/jdk.")
+          return
+        end
+        local major = java_major(java_bin)
+        if major and major < 17 then
+          warn("jdtls needs JDK 17 or newer. Found Java " .. major .. " at " .. java_bin .. ".")
+          return
+        end
+
         local root_dir = vim.fs.root(fname, { "gradlew", "mvnw", "pom.xml", "build.gradle", "build.gradle.kts", ".git" })
         local project = root_dir and vim.fs.basename(root_dir) or "default"
-        local full_cmd = vim.deepcopy(cmd)
-        vim.list_extend(full_cmd, {
+        local cmd = {
+          java_bin,
+          "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+          "-Dosgi.bundles.defaultStartLevel=4",
+          "-Declipse.product=org.eclipse.jdt.ls.core.product",
+          "-Dlog.protocol=true",
+          "-Dlog.level=ALL",
+          "-Xmx1g",
+          "--add-modules=ALL-SYSTEM",
+          "--add-opens",
+          "java.base/java.util=ALL-UNNAMED",
+          "--add-opens",
+          "java.base/java.lang=ALL-UNNAMED",
+        }
+        if layout.lombok then
+          table.insert(cmd, "-javaagent:" .. layout.lombok)
+        end
+        vim.list_extend(cmd, {
+          "-jar",
+          layout.jar,
           "-configuration",
-          vim.fn.stdpath("cache") .. "/jdtls/" .. project .. "/config",
+          layout.config,
           "-data",
           vim.fn.stdpath("cache") .. "/jdtls/" .. project .. "/workspace",
         })
 
-        local config = {
-          cmd = full_cmd,
+        require("jdtls").start_or_attach({
+          cmd = cmd,
+          cmd_env = { JAVA_HOME = java_home },
           root_dir = root_dir,
           capabilities = capabilities,
           init_options = { bundles = java_debug_bundles() },
@@ -93,7 +219,7 @@ return {
               eclipse = { downloadSources = true },
               configuration = {
                 updateBuildConfiguration = "automatic",
-                runtimes = java_runtimes(),
+                runtimes = java_runtimes(java_home, major),
               },
               maven = { downloadSources = true },
               implementationsCodeLens = { enabled = true },
@@ -116,9 +242,7 @@ return {
               },
             },
           },
-        }
-
-        require("jdtls").start_or_attach(config)
+        })
         pcall(require("jdtls").setup_dap, { hotcodereplace = "auto" })
       end
 
