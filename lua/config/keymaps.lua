@@ -84,9 +84,110 @@ end, { desc = "Grep search", silent = true })
 map("n", "<leader>uu", "<cmd>UndotreeToggle<CR>", { desc = "Toggle undotree" })
 
 -- Notifications / messages
+local function split_lines(text)
+  local lines = {}
+  if type(text) ~= "string" or text == "" then
+    return lines
+  end
+  for line in (text .. "\n"):gmatch("(.-)\n") do
+    lines[#lines + 1] = line
+  end
+  return lines
+end
+
+local function append_section(lines, title, body)
+  lines[#lines + 1] = "# " .. title
+  if type(body) ~= "string" or body == "" then
+    lines[#lines + 1] = "(none)"
+  else
+    vim.list_extend(lines, split_lines(body))
+  end
+  lines[#lines + 1] = ""
+end
+
+local function copy_notifications()
+  local lines = {}
+  local ok, notifier = pcall(require, "snacks.notifier")
+  if ok and type(notifier.get_history) == "function" then
+    local history_ok, history = pcall(function()
+      return notifier.get_history()
+    end)
+    local chunks = {}
+    if not history_ok or type(history) ~= "table" or #history == 0 then
+      chunks[1] = "(none)"
+    else
+      for _, notif in ipairs(history) do
+        local level = type(notif.level) == "string" and notif.level:upper() or tostring(notif.level)
+        local title = type(notif.title) == "string" and notif.title ~= "" and (" " .. notif.title) or ""
+        local msg = type(notif.msg) == "string" and notif.msg or vim.inspect(notif.msg)
+        chunks[#chunks + 1] = string.format("[%s]%s", level, title)
+        chunks[#chunks + 1] = msg
+        chunks[#chunks + 1] = ""
+      end
+    end
+    append_section(lines, "Notifications", table.concat(chunks, "\n"))
+  else
+    append_section(lines, "Notifications", "(snacks notifier is not loaded)")
+  end
+
+  local messages = ""
+  local messages_ok, messages_result = pcall(vim.api.nvim_exec2, "messages", { output = true })
+  if messages_ok and type(messages_result) == "table" then
+    messages = messages_result.output or ""
+  end
+  append_section(lines, "Messages", messages)
+
+  local log = vim.lsp.log.get_filename()
+  if vim.fn.filereadable(log) == 1 then
+    local all = vim.fn.readfile(log)
+    local start = math.max(1, #all - 39)
+    local tail = {}
+    for i = start, #all do
+      tail[#tail + 1] = all[i]
+    end
+    append_section(lines, "LSP log (last 40 lines) " .. log, table.concat(tail, "\n"))
+  else
+    append_section(lines, "LSP log", "(no lsp.log yet)")
+  end
+
+  if lines[#lines] == "" then
+    lines[#lines] = nil
+  end
+
+  local text = table.concat(lines, "\n")
+  vim.fn.setreg("+", text)
+  vim.fn.setreg("*", text)
+
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.bo[buf].buftype = "nofile"
+  vim.bo[buf].bufhidden = "wipe"
+  vim.bo[buf].swapfile = false
+  vim.bo[buf].filetype = "markdown"
+  vim.bo[buf].modifiable = false
+
+  vim.cmd.tabnew()
+  local empty = vim.api.nvim_get_current_buf()
+  vim.api.nvim_win_set_buf(0, buf)
+  if empty ~= buf and vim.api.nvim_buf_is_valid(empty) and vim.api.nvim_buf_get_name(empty) == "" then
+    pcall(vim.api.nvim_buf_delete, empty, { force = true })
+  end
+  vim.keymap.set("n", "q", "<cmd>tabclose<CR>", { buffer = buf, nowait = true, silent = true })
+  vim.keymap.set("n", "y", function()
+    vim.fn.setreg("+", text)
+    vim.fn.setreg("*", text)
+    vim.api.nvim_echo({ { "Copied notifications", "Normal" } }, false, {})
+  end, { buffer = buf, nowait = true, silent = true, desc = "Copy notifications again" })
+  vim.api.nvim_echo({
+    { "Copied notifications. This tab has the same text. Press q to close it.", "Normal" },
+  }, false, {})
+end
+
 map("n", "<leader>sn", function()
   require("snacks.notifier").show_history()
 end, { desc = "Notifier history", silent = true })
+map("n", "<leader>sy", copy_notifications, { desc = "Copy all notifications", silent = true })
+vim.api.nvim_create_user_command("CopyNotifications", copy_notifications, { desc = "Copy all notifications" })
 
 local function copy_location(absolute)
   local name = vim.api.nvim_buf_get_name(0)
