@@ -1,5 +1,5 @@
 # User-local Neovim install for Windows. No administrator rights.
-#   irm https://raw.githubusercontent.com/elmm-programing/nvim/cursor/video-nvim-citrix-499f/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/elmm-programing/nvim/main/install.ps1 | iex
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
@@ -9,7 +9,7 @@ $GoVersion = "1.27.3"
 $RgVersion = "15.2.0"
 $FdVersion = "10.5.1"
 $LazyGitVersion = "0.66.2"
-$Branch = "cursor/video-nvim-citrix-499f"
+$Branch = "main"
 $Repo = "https://github.com/elmm-programing/nvim.git"
 
 $Prefix = Join-Path $env:LOCALAPPDATA "nvim-tools"

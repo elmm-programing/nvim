@@ -21,13 +21,13 @@ $env:HTTP_PROXY = "http://proxy.example:8080"
 Ubuntu and macOS:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/elmm-programing/nvim/cursor/video-nvim-citrix-499f/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/elmm-programing/nvim/main/install.sh | bash
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://raw.githubusercontent.com/elmm-programing/nvim/cursor/video-nvim-citrix-499f/install.ps1 | iex
+irm https://raw.githubusercontent.com/elmm-programing/nvim/main/install.ps1 | iex
 ```
 
 Open a new terminal when it finishes, then run `nvim`.
@@ -42,7 +42,7 @@ Tools go to `~/.local/nvim-tools` on Ubuntu and macOS, and to `%LOCALAPPDATA%\nv
 - Java 17 or newer. Otherwise Temurin JDK 21. `JAVA_HOME` points at that JDK when this script installed it.
 - `rg`, `fd`, and `lazygit` when the command is missing.
 
-The config is cloned to `~/.config/nvim` (Windows: `%LOCALAPPDATA%\nvim`) from branch `cursor/video-nvim-citrix-499f`. If that folder already exists, it is left alone.
+The config is cloned to `~/.config/nvim` (Windows: `%LOCALAPPDATA%\nvim`) from `main`. If that folder already exists, it is left alone.
 
 The script then runs `:Lazy sync` and `:MasonInstall` for the servers and tools in `lua/config/plugins/lsp.lua` and `lua/config/plugins/debugging.lua`, including `gopls`, `vtsls`, `jdtls`, `vue-language-server`, prettier, `eslint_d`, gofumpt, and delve. Mason stops after 15 minutes and prints anything still missing.
 

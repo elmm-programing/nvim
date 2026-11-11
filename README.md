@@ -12,20 +12,18 @@ One command. It does not need admin rights. `git` must already be installed. A p
 Ubuntu and macOS:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/elmm-programing/nvim/cursor/video-nvim-citrix-499f/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/elmm-programing/nvim/main/install.sh | bash
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://raw.githubusercontent.com/elmm-programing/nvim/cursor/video-nvim-citrix-499f/install.ps1 | iex
+irm https://raw.githubusercontent.com/elmm-programing/nvim/main/install.ps1 | iex
 ```
 
 The script installs Neovim 0.11.4, Node 22, Go, Temurin JDK 21, ripgrep, fd, and lazygit into your user account when those tools are missing or too old. It then clones this config and installs the Mason language servers and formatters. Open a new terminal and run `nvim`.
 
 Citrix and the full list of what is skipped when a tool is already present: [docs/citrix.md](docs/citrix.md).
-
-`main` and `Mac` are kept identical.
 
 ## After pulling
 

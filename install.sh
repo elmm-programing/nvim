@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # User-local Neovim install for Ubuntu and macOS. No sudo.
-#   curl -fsSL https://raw.githubusercontent.com/elmm-programing/nvim/cursor/video-nvim-citrix-499f/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/elmm-programing/nvim/main/install.sh | bash
 set -euo pipefail
 
 NVIM_VERSION=0.11.4
@@ -9,7 +9,7 @@ GO_VERSION=1.27.3
 RG_VERSION=15.2.0
 FD_VERSION=10.5.1
 LAZYGIT_VERSION=0.66.2
-BRANCH=cursor/video-nvim-citrix-499f
+BRANCH=main
 REPO=https://github.com/elmm-programing/nvim.git
 
 PREFIX="${HOME}/.local/nvim-tools"
