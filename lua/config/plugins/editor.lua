@@ -392,6 +392,7 @@ return {
         { "<leader>x", group = "diagnostics" },
         { "<leader>h", group = "git hunk" },
         { "<leader>s", group = "search/symbols" },
+        { "<leader>sy", desc = "Copy all notifications" },
         { "<leader>r", group = "refactor" },
         { "<leader>u", group = "ui" },
         { "<leader>q", group = "quit/session" },
