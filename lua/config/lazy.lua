@@ -13,7 +13,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup("config.plugins", {
   defaults = { lazy = true },
-  install = { colorscheme = { "tokyonight" } },
+  install = { colorscheme = { "catppuccin" } },
   checker = { enabled = true, notify = false, frequency = 86400 },
   change_detection = { notify = false },
   lockfile = vim.fn.stdpath("config") .. "/lazy-lock.json",
