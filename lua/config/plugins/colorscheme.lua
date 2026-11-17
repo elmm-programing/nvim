@@ -1,22 +1,29 @@
 return {
   {
-    "craftzdog/solarized-osaka.nvim",
+    "catppuccin/nvim",
+    name = "catppuccin",
     lazy = false,
     priority = 1000,
     opts = {
-      style = "vivid",
-      transparent = true,
+      flavour = "mocha",
+      transparent_background = true,
       styles = {
-        comments = { italic = true },
-        keywords = { italic = true },
-        sidebars = "dark",
-        floats = "dark",
+        comments = { "italic" },
+        keywords = { "italic" },
       },
-      sidebars = { "neo-tree", "qf", "help", "trouble" },
+      integrations = {
+        blink_cmp = true,
+        gitsigns = true,
+        mason = true,
+        neotree = true,
+        snacks = true,
+        telescope = true,
+        which_key = true,
+      },
     },
     config = function(_, opts)
-      require("solarized-osaka").setup(opts)
-      vim.cmd.colorscheme("solarized-osaka")
+      require("catppuccin").setup(opts)
+      vim.cmd.colorscheme("catppuccin")
     end,
   },
 }
