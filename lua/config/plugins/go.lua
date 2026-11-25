@@ -9,6 +9,7 @@ return {
     },
     opts = {
       lsp_cfg = false, -- gopls is started from lua/config/plugins/lsp.lua
+      -- lsp.lua enables code lenses. go.nvim still calls the removed refresh().
       lsp_codelens = false,
       max_len = 120,
       max_column = 120,

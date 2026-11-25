@@ -21,7 +21,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup,
-  pattern = { "json", "jsonc", "yaml", "yml", "toml", "markdown" },
+  pattern = { "json", "jsonc", "yaml", "toml", "markdown" },
   callback = function()
     vim.bo.tabstop = 2
     vim.bo.shiftwidth = 2

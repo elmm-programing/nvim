@@ -274,7 +274,7 @@ return {
             return false
           end,
         },
-        indent = { enable = true, disable = { "yaml", "yml" } },
+        indent = { enable = true, disable = { "yaml" } },
         incremental_selection = {
           enable = true,
           keymaps = {

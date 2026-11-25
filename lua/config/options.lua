@@ -117,6 +117,33 @@ vim.g.loaded_perl_provider = 0
 vim.g.loaded_python3_provider = 0
 vim.g.loaded_ruby_provider = 0
 
+-- This config uses lazy.nvim, not vim.pack. An empty site/pack/core directory
+-- makes :checkhealth warn about a missing lockfile, and lazy warns about it too.
+do
+  local root = vim.fn.stdpath("data") .. "/site/pack/core"
+  local lockfile = vim.fn.stdpath("config") .. "/nvim-pack-lock.json"
+  -- True only when every entry is an empty directory. A file means vim.pack
+  -- actually installed something, so leave the tree alone.
+  local function only_empty_dirs(dir)
+    if vim.fn.isdirectory(dir) == 0 then
+      return false
+    end
+    local names = vim.fn.readdir(dir)
+    if type(names) ~= "table" then
+      return false
+    end
+    for _, name in ipairs(names) do
+      if name ~= "." and name ~= ".." and not only_empty_dirs(dir .. "/" .. name) then
+        return false
+      end
+    end
+    return true
+  end
+  if vim.fn.isdirectory(root) == 1 and vim.fn.filereadable(lockfile) == 0 and only_empty_dirs(root) then
+    vim.fn.delete(root, "rf")
+  end
+end
+
 -- go.nvim health: GOBIN + PATH so GOPATH/bin tools are visible
 local gobin = vim.fn.expand("~/go/bin")
 if vim.fn.isdirectory(gobin) == 1 then

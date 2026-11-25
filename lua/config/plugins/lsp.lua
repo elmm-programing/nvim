@@ -133,6 +133,36 @@ return {
       end
       pcall(vim.keymap.del, { "v", "x" }, "gra")
 
+      -- Neovim 0.13 removed vim.lsp.codelens.refresh(). enable() starts the
+      -- built-in provider, which refreshes as the buffer changes. Older
+      -- Neovim only has refresh().
+      local function codelens_uses_enable()
+        return type(vim.lsp.codelens) == "table" and type(vim.lsp.codelens.enable) == "function"
+      end
+
+      local function enable_codelens(bufnr)
+        if codelens_uses_enable() then
+          vim.lsp.codelens.enable(true, { bufnr = bufnr })
+          return
+        end
+        if vim.lsp.codelens and vim.lsp.codelens.refresh then
+          vim.lsp.codelens.refresh({ bufnr = bufnr })
+        end
+      end
+
+      local function refresh_codelens(bufnr)
+        if codelens_uses_enable() then
+          if type(vim.lsp.codelens.is_enabled) == "function" and vim.lsp.codelens.is_enabled({ bufnr = bufnr }) then
+            vim.lsp.codelens.enable(false, { bufnr = bufnr })
+          end
+          vim.lsp.codelens.enable(true, { bufnr = bufnr })
+          return
+        end
+        if vim.lsp.codelens and vim.lsp.codelens.refresh then
+          vim.lsp.codelens.refresh({ bufnr = bufnr })
+        end
+      end
+
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("LspConfig", { clear = true }),
         callback = function(args)
@@ -194,10 +224,10 @@ return {
             vim.keymap.set("n", "<leader>sS", function()
               require("telescope.builtin").lsp_workspace_symbols({ symbol_width = 60 })
             end, vim.tbl_extend("force", opts, { desc = "LSP Workspace Symbols" }))
-            vim.keymap.set("n", "<leader>wd", function()
+            vim.keymap.set("n", "<leader>xd", function()
               require("telescope.builtin").diagnostics({ bufnr = 0 })
             end, vim.tbl_extend("force", opts, { desc = "Buffer diagnostics" }))
-            vim.keymap.set("n", "<leader>wD", function()
+            vim.keymap.set("n", "<leader>xD", function()
               require("telescope.builtin").diagnostics()
             end, vim.tbl_extend("force", opts, { desc = "All diagnostics" }))
             vim.keymap.set("n", "<leader>uh", function()
@@ -206,21 +236,25 @@ return {
           end
 
           if client and client.server_capabilities.codeLensProvider then
-            pcall(vim.lsp.codelens.refresh, { bufnr = bufnr })
+            enable_codelens(bufnr)
             if not vim.b[bufnr].codelens_au then
               vim.b[bufnr].codelens_au = true
               vim.keymap.set("n", "<leader>cc", function()
                 vim.lsp.codelens.run()
               end, vim.tbl_extend("force", opts, { desc = "Run Codelens" }))
               vim.keymap.set("n", "<leader>cC", function()
-                vim.lsp.codelens.refresh({ bufnr = bufnr })
+                refresh_codelens(bufnr)
               end, vim.tbl_extend("force", opts, { desc = "Refresh Codelens" }))
-              vim.api.nvim_create_autocmd({ "InsertLeave", "BufWritePost" }, {
-                buffer = bufnr,
-                callback = function()
-                  pcall(vim.lsp.codelens.refresh, { bufnr = bufnr })
-                end,
-              })
+              -- 0.11+ refreshes code lenses from enable(). Only older Neovim
+              -- needs an explicit refresh after edits.
+              if not codelens_uses_enable() then
+                vim.api.nvim_create_autocmd({ "InsertLeave", "BufWritePost" }, {
+                  buffer = bufnr,
+                  callback = function()
+                    refresh_codelens(bufnr)
+                  end,
+                })
+              end
             end
           end
 
@@ -426,7 +460,8 @@ return {
       })
       configure_server("yamlls", {
         capabilities = capabilities,
-        filetypes = { "yaml", "yml" },
+        -- "yml" is a filename extension. Neovim's filetype is "yaml".
+        filetypes = { "yaml" },
         settings = yaml_settings,
       })
 
